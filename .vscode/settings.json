@@ -1,0 +1,17 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "always",
+    "source.fixAll.eslint": "always",
+    "source.organizeImports": "explicit",
+    "source.sortMembers": "explicit"
+  },
+  "editor.rulers": [100], // Ekranda 120 karakter sınırı çizgisi
+  "editor.wordWrap": "off", // Satırları kırma
+  "editor.wordWrapColumn": 100, // İstersen wrap sütununu belirle
+  "prettier.printWidth": 100, // Prettier satır uzunluğu sınırı
+  "eslint.rules.customizations": [
+    { "rule": "max-len", "severity": "off" } // Eğer eslint max-len kullanıyorsa kapat
+  ],
+  "eslint.validate": ["javascript", "typescript", "typescriptreact"]
+}

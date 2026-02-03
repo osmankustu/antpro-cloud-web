@@ -1,0 +1,44 @@
+'use client';
+
+import PageBreadcrumb from '@/components/common/PageBreadCrumb';
+import { ServiceDetailToolbar } from '@/modules/service-management/features/service/components/ui/detail/ServiceDetailToolbar';
+import { useServiceDetailCtx } from '@/modules/service-management/features/service/context/ServiceDetailContext';
+import { ServiceDetailProvider } from '@/modules/service-management/features/service/context/ServiceDetailProvider';
+import { useParams } from 'next/navigation';
+import { ReactNode } from 'react';
+
+export default function ServiceDetailLayout({ children }: { children: ReactNode }) {
+  const params = useParams();
+  const id = params.id as string;
+
+  function ToolbarBridge() {
+    const query = useServiceDetailCtx();
+    return (
+      <ServiceDetailToolbar
+        service={query.service}
+        customerName={query.customerName}
+        isLoading={query.isLoading}
+        isFetching={query.isFetching}
+        error={query.error}
+        onRetry={query.refetch}
+        onDelete={query.handleDelete}
+        router={query.router}
+      />
+    );
+  }
+
+  return (
+    <ServiceDetailProvider serviceId={id}>
+      <div>
+        <PageBreadcrumb pageTitle="Servis Detayları" />
+        <div className="space-y-4">
+          <ToolbarBridge />
+
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+            {children}
+          </div>
+        </div>
+      </div>
+    </ServiceDetailProvider>
+  );
+}
