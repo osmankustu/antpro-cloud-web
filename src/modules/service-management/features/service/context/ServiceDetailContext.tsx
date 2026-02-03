@@ -10,7 +10,7 @@ export type ServiceDetailContextType = {
   isDeleting: boolean;
   isLoading: boolean;
   isFetching: boolean;
-  error: ResponseError | null;
+  error: ResponseError | undefined;
   refetch?: () => void;
   handleDelete: () => void;
   router: AppRouterInstance;

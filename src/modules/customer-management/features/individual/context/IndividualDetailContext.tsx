@@ -1,4 +1,5 @@
 import { ResponseError } from '@/core/connection/types/error/errorResponse';
+import { Listed } from '@/core/connection/types/response/listed';
 import { AddressModel } from '@/modules/customer-management/types/address.types';
 import { IndividualCustomerModel } from '@/modules/customer-management/types/individual.types.';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
@@ -6,7 +7,7 @@ import { createContext, useContext } from 'react';
 
 export type IndividualDetailContextType = {
   customer?: IndividualCustomerModel;
-  addresses?: AddressModel;
+  addresses?: Listed<AddressModel>;
   isDeleting: boolean;
   isLoading: boolean;
   isFetching: boolean;

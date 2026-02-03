@@ -1,7 +1,7 @@
 'use client';
 import { DashboardStatCard } from '@/components/dashboard/cards/DashboardCard';
 import { useAppSelector } from '@/core/store/base/hook';
-import { ServiceMap, ServiceMapDashboard } from '@/modules/service-management/features/dashboard/components/ui/maps/ServiceMaps';
+import { ServiceMap } from '@/modules/service-management/features/dashboard/components/ui/maps/ServiceMaps';
 import { useServiceDashboard } from '@/modules/service-management/hooks/useServiceDashboard';
 import { useRouter } from 'next/navigation';
 import { FcAlarmClock, FcApproval, FcSettings } from 'react-icons/fc';

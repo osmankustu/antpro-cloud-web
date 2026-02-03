@@ -28,7 +28,7 @@ export const reduxClient = async <T = any>(
   } catch (error: any) {
     const err = handleError(error);
     return {
-      error: err,
+      error: { ...err, status: err.statusCode },
     };
   } finally {
     rootStore.dispatch(stopLoading());

@@ -8,8 +8,8 @@ interface DetailToolbarProps {
   title: string;
   service?: ServiceModel;
   activity?: ActivityModel;
-  isLoading: boolean;
-  isFetching: boolean;
+  isLoading?: boolean;
+  isFetching?: boolean;
   router: AppRouterInstance;
   error?: any;
   onRetry?: () => void;

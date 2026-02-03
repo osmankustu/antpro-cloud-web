@@ -3,7 +3,7 @@ import React from 'react';
 
 interface DashboardStatCardProps {
   title: string;
-  value: number | string;
+  value?: number | string;
   icon?: React.ReactNode;
   className?: string;
 }

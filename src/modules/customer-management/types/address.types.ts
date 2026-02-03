@@ -23,8 +23,8 @@ export interface AddressAddModel {
   stateId: number;
   state: string;
   postalCode: string;
-  latitude: number;
-  longitude: number;
+  latitude: number |null;
+  longitude: number | null;
 }
 
 export interface AddressUpdateModel {

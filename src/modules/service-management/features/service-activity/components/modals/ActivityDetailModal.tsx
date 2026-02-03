@@ -10,14 +10,16 @@ import {
   Section,
   Skeleton,
 } from '@/modules/service-management/components/ui/detail';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { useActivityDetail } from '../../hooks/useActivitiyDetail';
 import { ActivityDetailToolbar } from '../ui/detail/ActivityDetailToolbar';
 
 interface ActivityDetailModalProps {
   activityId: string;
+  router: AppRouterInstance;
 }
 
-export function ActivityDetailModal({ activityId }: ActivityDetailModalProps) {
+export function ActivityDetailModal({ activityId, router }: ActivityDetailModalProps) {
   const { isOpen, closeModal, openModal } = useModal();
 
   const {
@@ -25,10 +27,10 @@ export function ActivityDetailModal({ activityId }: ActivityDetailModalProps) {
     employeeFullName,
     isLoading,
     isFetching,
-    deleteLoading,
+    isDeleting,
     error,
     handleDelete,
-    refetchActivity,
+    refetch,
   } = useActivityDetail(activityId);
 
   return (
@@ -43,7 +45,7 @@ export function ActivityDetailModal({ activityId }: ActivityDetailModalProps) {
         ) : error ? (
           <div className="mt-25 text-center text-sm text-red-500 dark:text-red-400">
             {error.detail || 'Servis bilgileri yüklenemedi.'}
-            <button className="ml-2 underline" onClick={refetchActivity}>
+            <button className="ml-2 underline" onClick={refetch}>
               Tekrar Dene
             </button>
           </div>
@@ -51,17 +53,9 @@ export function ActivityDetailModal({ activityId }: ActivityDetailModalProps) {
           <div className="no-scrollbar relative mt-7 w-full overflow-y-auto rounded-3xl bg-white p-4 lg:p-11 dark:bg-gray-900">
             <ActivityDetailToolbar
               title="Hareket Detayı"
-              actions={
-                <>
-                  <Button variant="outline" size="sm">
-                    Düzenle
-                  </Button>
-
-                  <Button size="sm" disabled={deleteLoading} onClick={handleDelete}>
-                    Sil
-                  </Button>
-                </>
-              }
+              isLoading={isDeleting}
+              onDelete={handleDelete}
+              router={router}
             />
 
             {/* CONTENT */}
