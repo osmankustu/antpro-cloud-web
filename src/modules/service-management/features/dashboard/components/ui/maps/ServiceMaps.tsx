@@ -67,7 +67,12 @@ export function ServiceMap({ cities = [] }: ServiceMapProps) {
 
       {/* MAP */}
       <div className="col-span-8">
-        <MapContainer center={[36.883, 30.65]} zoom={7} className="h-[500px] w-full rounded-2xl">
+        <MapContainer
+          center={[36.883, 30.65]}
+          zoom={7}
+          className="h-[500px] w-full rounded-2xl"
+          // whenCreated={(map: any) => (mapRef.current = map)}
+        >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
           {cities.map(city =>
@@ -75,7 +80,7 @@ export function ServiceMap({ cities = [] }: ServiceMapProps) {
               <Circle
                 key={`${city.name}-${state.name}`}
                 center={[state.lat, state.lon]}
-                //radius={Math.max(state.serviceCount * 400, 300)}
+                radius={Math.max(state.serviceCount * 400, 300)}
                 pathOptions={{
                   color: '#2563eb',
                   fillColor: '#3b82f6',
