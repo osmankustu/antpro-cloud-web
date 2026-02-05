@@ -1,17 +1,17 @@
 import Select from 'react-select';
-import { PriortyDataSheet } from '../../constants/selectDataSheet';
+import { ServiceStatusDataSheet } from '../../constants/selectDataSheet';
 
-interface PrioritySelectPorps {
+interface ServiceStatusSelectPorps {
   onChange: (value?: string) => void;
   error?: boolean;
   value?: string;
 }
 
-export function PrioritySelect({ onChange, error, value }: PrioritySelectPorps) {
+export function ServiceStatusSelect({ onChange, error, value }: ServiceStatusSelectPorps) {
   return (
     <Select
       id="y"
-      options={PriortyDataSheet}
+      options={ServiceStatusDataSheet}
       styles={{
         control: (base, state) => ({
           ...base,
@@ -20,9 +20,9 @@ export function PrioritySelect({ onChange, error, value }: PrioritySelectPorps) 
       }}
       getOptionLabel={e => e.label}
       getOptionValue={e => e.value}
-      value={PriortyDataSheet.find(e => e.value === value)}
+      value={ServiceStatusDataSheet.find(e => e.value === value)}
       onChange={value => onChange(value?.value)}
-      placeholder={'Öncelik Durumu Seçiniz...'}
+      placeholder={'Servis Durumu Seçiniz...'}
     />
   );
 }

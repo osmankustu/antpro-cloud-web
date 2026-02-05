@@ -55,17 +55,17 @@ const documentEndpoints = serviceManagementApi.injectEndpoints({
         formData.append('serviceId', body.serviceId);
 
         body.files.forEach(file => {
-          formData.append('files', {
-            uri: file.uri,
-            name: file.name,
-            type: file.mimeType,
-          } as any);
+          console.log(file);
+          formData.append('files', file);
         });
 
         return {
           url: 'ServiceDocuments',
           method: 'POST',
           data: formData,
+          onUploadProgress: progress => {
+            console.log('Upload %', progress);
+          },
         };
       },
       invalidatesTags: ['service-document'],

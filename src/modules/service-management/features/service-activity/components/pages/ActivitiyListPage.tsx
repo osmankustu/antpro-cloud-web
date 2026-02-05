@@ -15,7 +15,7 @@ export default function ActivityListPage({ service }: ActivityListPageProps) {
 
   return (
     <>
-      <ActivityToolbar router={router} />
+      <ActivityToolbar router={router} service={service} />
       <ActivityTable
         activities={activities}
         isFetching={isFetching}

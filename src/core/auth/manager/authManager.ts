@@ -27,7 +27,7 @@ export const AuthManager = {
       rootStore.dispatch(setToken(response.accessToken));
       const me = (await AuthService.me()).data;
       const info = (await AuthService.myInfo()).data;
-      const user: User = { ...me, ...info };
+      const user: User = { ...me, ...info, employeeId: info.id };
 
       const roles = await TokenService.getUserRoles(response.accessToken.token);
 

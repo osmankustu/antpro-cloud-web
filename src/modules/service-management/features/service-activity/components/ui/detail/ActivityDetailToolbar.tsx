@@ -43,7 +43,7 @@ export function ActivityDetailToolbar({
           }
         />
         <ToolbarButton
-          children={'Düzenle'}
+          children={'Düzenle-Döküman Ekle'}
           active={isEdit}
           onClick={() => router.push(`${activity?.id}/edit-activity`)}
         />
