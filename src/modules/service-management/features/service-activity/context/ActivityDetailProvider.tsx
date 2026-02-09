@@ -20,11 +20,20 @@ export function ActivityDetailProvider({ activityId, children }: Props) {
       isLoading: query.isLoading,
       isFetching: query.isFetching,
       isDeleting: query.isDeleting,
+      isDeleteSuccess: query.isDeleteSuccess,
       error: query.error,
       refetch: query.refetch,
       handleDelete: query.handleDelete,
     }),
-    [query.activity, query.isLoading, query.isFetching, query.error, query.refetch],
+    [
+      query.activity,
+      query.isLoading,
+      query.isFetching,
+      query.error,
+      query.refetch,
+      query.isDeleting,
+      query.isDeleteSuccess,
+    ],
   );
 
   return (

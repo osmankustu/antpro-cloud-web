@@ -18,8 +18,8 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <body className={`${outfit.className} dark:bg-gray-900`}>
-        <ToastContainer />
         <ThemeProvider>
+          <ToastContainer />
           <SidebarProvider>{children}</SidebarProvider>
         </ThemeProvider>
       </body>

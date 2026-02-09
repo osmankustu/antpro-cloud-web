@@ -26,7 +26,8 @@ export function useActivityDetail(activityId: string) {
     isLoading: employeesLoading,
   } = getAllEmployees;
 
-  const [deleteActivity, { isLoading: isDeleting }] = useDeleteActivityMutation();
+  const [deleteActivity, { isLoading: isDeleting, isSuccess: isDeleteSuccess }] =
+    useDeleteActivityMutation();
 
   // Merge employee name properly
   const employeeFullName = useMemo(() => {
@@ -69,6 +70,7 @@ export function useActivityDetail(activityId: string) {
     isLoading,
     isFetching,
     isDeleting,
+    isDeleteSuccess,
     error,
 
     // Actions

@@ -3,7 +3,7 @@ import { setupRequestInterceptor } from '../interceptors/requestInterceptor';
 import { setupResponseInterceptor } from '../interceptors/responseInterceptor';
 
 const axiosClient = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api/${process.env.NEXT_PUBLIC_API_VERSION}`,
+  baseURL: `/api`,
   withCredentials: true,
   headers: { 'Accept-Language': 'tr' },
 });

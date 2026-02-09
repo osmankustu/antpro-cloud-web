@@ -9,6 +9,7 @@ export type ActivityDetailContextType = {
   isLoading: boolean;
   isFetching: boolean;
   isDeleting: boolean;
+  isDeleteSuccess: boolean;
   error: ResponseError | undefined;
   refetch: () => void;
   handleDelete: () => void;

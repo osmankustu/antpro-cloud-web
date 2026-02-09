@@ -21,6 +21,8 @@ export default function ActivityDetailLayout({ children }: { children: React.Rea
         service={serviceQuery.service}
         isLoading={query.isLoading}
         isFetching={query.isFetching}
+        isDeleting={query.isDeleting}
+        isDeletingSuccess={query.isDeleteSuccess}
         error={query.error}
         onRetry={query.refetch}
         onDelete={query.handleDelete}

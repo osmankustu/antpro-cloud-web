@@ -1,6 +1,6 @@
 import { AxiosError, AxiosInstance } from 'axios';
-import { FailedRequest } from '../types/failedRequest';
 import { handleError } from '../../error/errorHandler';
+import { FailedRequest } from '../types/failedRequest';
 
 // token yenilenene kadar istekleri bekletme mekanizması
 let isRefreshing: boolean = false;

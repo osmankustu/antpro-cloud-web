@@ -7,106 +7,91 @@ import { useStaffSharedEndpoints } from '@/modules/staff-management/hooks/useSta
 import { useEffect, useState } from 'react';
 
 export default function useServiceAdd() {
-  const { getCorporateOptions, getIndividualOptions, getByIdCustomerAddressList } =
-    useCustomerSharedEndpoints();
-  const { getAllEmployees, getAllTeams } = useStaffSharedEndpoints();
+  const customerEndpoints = useCustomerSharedEndpoints();
+  const staffEndpoints = useStaffSharedEndpoints();
 
-  const {
-    data: corporateCustomers,
-    isFetching: corporateFetching,
-    isLoading: corporateLoading,
-    error: corporateError,
-  } = getCorporateOptions;
-  const {
-    data: IndividualCustomers,
-    isFetching: individualFetching,
-    isLoading: individualLoading,
-    error: individualError,
-  } = getIndividualOptions;
+  const corporate = customerEndpoints.getCorporateOptions;
+  const individual = customerEndpoints.getIndividualOptions;
+  const employeesQuery = staffEndpoints.getAllEmployees;
+  const teamsQuery = staffEndpoints.getAllTeams;
 
-  const {
-    data: employees,
-    isFetching: employeesFetching,
-    isLoading: employeesLoading,
-    error: employeesError,
-  } = getAllEmployees;
-  const {
-    data: teams,
-    isFetching: teamsFetching,
-    isLoading: teamsLoading,
-    error: teamsError,
-  } = getAllTeams;
-
-  const [error, setError] = useState<ResponseError | undefined>();
+  const [formError, setFormError] = useState<ResponseError>();
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ServiceAddModel, string>>>(
     {},
   );
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [addServiceMutation] = useAddServiceMutation();
+  const [addService, submitState] = useAddServiceMutation();
 
-  const handleAddService = async (data: ServiceAddModel) => {
-    setError(undefined);
+  const addServiceAction = async (payload: ServiceAddModel) => {
+    setFormError(undefined);
     setFieldErrors({});
-    setIsSubmitting(true);
 
     try {
-      await addServiceMutation(data).unwrap();
+      await addService(payload).unwrap();
       Toast.success('Servis başarıyla eklendi!');
     } catch (err) {
-      const e = err as ResponseError;
-      setError(e);
+      const error = err as ResponseError;
+      setFormError(error);
 
-      if (e.Errors && Array.isArray(e.Errors)) {
-        const mappedErrors: Partial<Record<keyof ServiceAddModel, string>> = {};
-        e.Errors.forEach(fe => {
-          // Backend Property isimlerini camelCase'e çevir
-          const key = (fe.Property.charAt(0).toLowerCase() +
-            fe.Property.slice(1)) as keyof ServiceAddModel;
-          mappedErrors[key] = fe.Errors.join(' | ');
+      if (Array.isArray(error.Errors)) {
+        const mapped: Partial<Record<keyof ServiceAddModel, string>> = {};
+        error.Errors.forEach(e => {
+          const key = (e.Property.charAt(0).toLowerCase() +
+            e.Property.slice(1)) as keyof ServiceAddModel;
+          mapped[key] = e.Errors.join(' | ');
         });
-        setFieldErrors(mappedErrors);
+        setFieldErrors(mapped);
       }
 
-      if (e.type === 'https://example.com/probs/validation') {
-        Toast.warning(e.title || 'Servis eklenemedi');
-      } else {
-        Toast.error(e.title || 'Servis eklenemedi');
-      }
-    } finally {
-      setIsSubmitting(false);
+      Toast[error.type?.includes('validation') ? 'warning' : 'error'](
+        error.title || 'Servis eklenemedi',
+      );
     }
   };
 
-  const endpointError = (corporateError ||
-    individualError ||
-    employeesError ||
-    teamsError) as ResponseError;
-
-  const isFetching = corporateFetching || individualFetching || employeesFetching || teamsFetching;
-  const isLoading = corporateLoading || individualLoading || employeesLoading || teamsLoading;
+  const fetchError =
+    corporate.error || individual.error || employeesQuery.error || teamsQuery.error;
 
   // Show API Errors once
   useEffect(() => {
-    if (!endpointError) return;
-    setError(endpointError);
-    Toast.error(endpointError?.title);
-  }, [endpointError]);
+    if (fetchError) Toast.error((fetchError as ResponseError).title);
+  }, [fetchError]);
 
   return {
-    options: {
-      corporateCustomers,
-      IndividualCustomers,
-      getByIdCustomerAddressList,
-      employees,
-      teams,
-      isFetching,
-      isLoading,
-      endpointError,
+    data: {
+      corporateCustomers: corporate.data,
+      individualCustomers: individual.data,
+      employees: employeesQuery.data,
+      teams: teamsQuery.data,
+      getCustomerAddresses: (id: string) => customerEndpoints.getByIdCustomerAddressList(id),
     },
-    handleAddService,
-    isSubmitting,
-    fieldErrors,
-    error,
+
+    state: {
+      isLoadingOptions:
+        corporate.isLoading ||
+        individual.isLoading ||
+        employeesQuery.isLoading ||
+        teamsQuery.isLoading,
+
+      isFetchingOptions:
+        corporate.isFetching ||
+        individual.isFetching ||
+        employeesQuery.isFetching ||
+        teamsQuery.isFetching,
+
+      isSubmitting: submitState.isLoading,
+      isSubmitSuccess: submitState.isSuccess,
+      isSubmitError: submitState.isError,
+    },
+
+    errors: {
+      formError,
+      fieldErrors,
+      fetchError: fetchError as ResponseError | undefined,
+    },
+
+    actions: {
+      addService: addServiceAction,
+    },
   };
 }

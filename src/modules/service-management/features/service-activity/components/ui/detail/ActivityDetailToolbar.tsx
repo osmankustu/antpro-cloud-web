@@ -1,4 +1,6 @@
 import ToolbarButton from '@/components/ui/button/ToolbarButton';
+import { DeleteModal } from '@/components/ui/modals/DeleteModal';
+import { ServiceMessages } from '@/modules/service-management/constants/serviceMessages';
 import { ActivityModel } from '@/modules/service-management/types/activity.types';
 import { ServiceModel } from '@/modules/service-management/types/service.types';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
@@ -10,6 +12,8 @@ interface DetailToolbarProps {
   activity?: ActivityModel;
   isLoading?: boolean;
   isFetching?: boolean;
+  isDeleting?: boolean;
+  isDeletingSuccess?: boolean;
   router: AppRouterInstance;
   error?: any;
   onRetry?: () => void;
@@ -22,6 +26,8 @@ export function ActivityDetailToolbar({
   activity,
   isLoading,
   isFetching,
+  isDeleting,
+  isDeletingSuccess,
   router,
   error,
   onRetry,
@@ -47,7 +53,12 @@ export function ActivityDetailToolbar({
           active={isEdit}
           onClick={() => router.push(`${activity?.id}/edit-activity`)}
         />
-        <ToolbarButton children={'Sil'} onClick={onDelete} />
+        <DeleteModal
+          message={ServiceMessages.deleteActivity}
+          onConfirm={onDelete}
+          onDeleting={isDeleting}
+          onSuccess={isDeletingSuccess}
+        />
       </div>
     </div>
   );

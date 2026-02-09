@@ -5,6 +5,8 @@ import TextArea from '@/components/form/input/TextArea';
 import Button from '@/components/ui/button/Button';
 import { useModal } from '@/hooks/useModal';
 import { BaseAddress } from '@/modules/customer-management/types/base/baseAddress';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import useServiceAdd from '../../features/service/hooks/useServiceAdd';
 import { ServiceAddModel } from '../../types/service.types';
@@ -18,8 +20,9 @@ import { PrioritySelect } from '../forms/PrioritySelect';
 import { AddressAddModal } from '../modals/AddressAddModal';
 
 export default function ServiceAddPage() {
+  const router = useRouter();
   const { openModal, isOpen, closeModal } = useModal();
-  const { options, handleAddService, isSubmitting, fieldErrors, error } = useServiceAdd();
+  const { data, state, actions, errors } = useServiceAdd();
   const { control, reset, handleSubmit, setValue } = useForm<ServiceAddModel>({
     defaultValues: {
       customerId: '',
@@ -27,7 +30,6 @@ export default function ServiceAddPage() {
       subject: '',
       priority: '',
       customerType: '',
-      addressType: 'regist',
       assignmentType: '',
       description: '',
       address: {
@@ -44,30 +46,27 @@ export default function ServiceAddPage() {
     },
   });
 
-  const addressType = useWatch({
-    control,
-    name: 'addressType',
-    defaultValue: 'Regist',
-  });
-
   const customerId = useWatch({
     control,
     name: 'customerId',
     defaultValue: '',
   });
 
+  useEffect(() => {
+    if (state.isSubmitSuccess) router.push('/management/service-management');
+  }, [state.isSubmitSuccess]);
+
   const handleServiceSubmit = (data: ServiceAddModel) => {
-    console.log(data);
-    handleAddService(data);
+    actions.addService(data);
   };
   return (
     <div className="space-y-6">
       <FormSection title="Müşteri Tipi">
         <CustomerSelect
-          corporateCustomers={options.corporateCustomers?.items}
-          individualCustomers={options.IndividualCustomers?.items}
-          error={!!fieldErrors.customerId}
-          hint={fieldErrors.customerId}
+          corporateCustomers={data.corporateCustomers?.items}
+          individualCustomers={data.individualCustomers?.items}
+          error={!!errors.fieldErrors.customerId}
+          hint={errors.fieldErrors.customerId}
           onChange={(value, type) => {
             if (type === 'Individual') {
               setValue('customerType', type);
@@ -88,7 +87,11 @@ export default function ServiceAddPage() {
               control={control}
               name="title"
               render={({ field }) => (
-                <Input {...field} error={!!fieldErrors.title} hint={fieldErrors.title} />
+                <Input
+                  {...field}
+                  error={!!errors.fieldErrors.title}
+                  hint={errors.fieldErrors.title}
+                />
               )}
             />
           </FormField>
@@ -97,7 +100,11 @@ export default function ServiceAddPage() {
               control={control}
               name="subject"
               render={({ field }) => (
-                <Input {...field} error={!!fieldErrors.subject} hint={fieldErrors.subject} />
+                <Input
+                  {...field}
+                  error={!!errors.fieldErrors.subject}
+                  hint={errors.fieldErrors.subject}
+                />
               )}
             />
           </FormField>
@@ -110,8 +117,8 @@ export default function ServiceAddPage() {
               render={({ field }) => (
                 <TextArea
                   {...field}
-                  error={!!fieldErrors.description}
-                  hint={fieldErrors.description}
+                  error={!!errors.fieldErrors.description}
+                  hint={errors.fieldErrors.description}
                 />
               )}
             />
@@ -125,7 +132,7 @@ export default function ServiceAddPage() {
               render={({ field }) => (
                 <PrioritySelect
                   onChange={value => field.onChange(value)}
-                  error={!!fieldErrors.priority}
+                  error={!!errors.fieldErrors.priority}
                 />
               )}
             />
@@ -141,7 +148,7 @@ export default function ServiceAddPage() {
               render={({ field }) => (
                 <AddressSelect
                   disabled={!customerId}
-                  addresses={options.getByIdCustomerAddressList(customerId).data?.items}
+                  addresses={data.getCustomerAddresses(customerId).data?.items}
                   onClick={openModal}
                   onChange={selected => {
                     const address: BaseAddress = selected!;
@@ -166,8 +173,8 @@ export default function ServiceAddPage() {
         <FormGrid>
           <FormField label="Atama Tipi">
             <AssignmentSelect
-              personnelList={options.employees?.items}
-              teamList={options.teams?.items}
+              personnelList={data.employees?.items}
+              teamList={data.teams?.items}
               onChange={(value, type) => {
                 if (type === 'personel') {
                   setValue('employeeId', value!);
@@ -190,7 +197,13 @@ export default function ServiceAddPage() {
 
       {/* Kaydet Butonu */}
       <div className="flex justify-end">
-        <Button size="sm" onClick={handleSubmit(handleServiceSubmit)} children={'Kaydet'} />
+        <Button
+          size="sm"
+          onClick={handleSubmit(handleServiceSubmit)}
+          isSubmitting={state.isSubmitting}
+          disabled={state.isSubmitting}
+          children={'Kaydet'}
+        />
       </div>
       <AddressAddModal isOpen={isOpen} onClose={closeModal} customerId={customerId} />
     </div>
