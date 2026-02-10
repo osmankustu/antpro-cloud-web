@@ -1,10 +1,11 @@
 import Input from '@/components/form/input/InputField';
 import TextArea from '@/components/form/input/TextArea';
-import Button from '@/components/ui/button/Button';
+import { UpdateModalButton } from '@/components/ui/button/UpdateModalButton';
 import { useModal } from '@/hooks/useModal';
 import { BaseAddress } from '@/modules/customer-management/types/base/baseAddress';
 import { useEffect } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
+import { ServiceMessages } from '../../constants/serviceMessages';
 import useServiceUpdate from '../../features/service/hooks/useServiceUpdate';
 import { ServiceModel, ServiceUpdateModel } from '../../types/service.types';
 import { AddressSelect } from '../forms/AddressSelect';
@@ -22,7 +23,7 @@ interface ServiceUpdatePageProps {
 
 export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
   const { isOpen, closeModal, openModal } = useModal();
-  const { options, handleUpdateService, error, fieldErrors, isSubmitting } = useServiceUpdate();
+  const { data, state, errors, actions } = useServiceUpdate();
   const { control, reset, setValue, getValues, handleSubmit } = useForm<ServiceUpdateModel>({
     defaultValues: {
       customerId: '',
@@ -82,19 +83,18 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
   });
 
   const handleServiceSubmit = (data: ServiceUpdateModel) => {
-    console.log(data);
-    handleUpdateService(data);
+    actions.updateService(data);
   };
   return (
     <div className="space-y-6">
       <FormSection title="Müşteri Tipi">
         <CustomerSelect
-          corporateCustomers={options.corporateCustomers?.items}
-          individualCustomers={options.IndividualCustomers?.items}
+          corporateCustomers={data.corporateCustomers?.items}
+          individualCustomers={data.individualCustomers?.items}
           defaultType={getValues('customerType')}
           defaultValueId={getValues('customerId')}
-          error={!!fieldErrors.customerId}
-          hint={fieldErrors.customerId}
+          error={!!errors.fieldErrors.customerId}
+          hint={errors.fieldErrors.customerId}
           onChange={(value, type) => {
             if (type === 'Individual') {
               setValue('customerType', type);
@@ -115,7 +115,11 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
               control={control}
               name="title"
               render={({ field }) => (
-                <Input {...field} error={!!fieldErrors.title} hint={fieldErrors.title} />
+                <Input
+                  {...field}
+                  error={!!errors.fieldErrors.title}
+                  hint={errors.fieldErrors.title}
+                />
               )}
             />
           </FormField>
@@ -124,7 +128,11 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
               control={control}
               name="subject"
               render={({ field }) => (
-                <Input {...field} error={!!fieldErrors.subject} hint={fieldErrors.subject} />
+                <Input
+                  {...field}
+                  error={!!errors.fieldErrors.subject}
+                  hint={errors.fieldErrors.subject}
+                />
               )}
             />
           </FormField>
@@ -137,8 +145,8 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
               render={({ field }) => (
                 <TextArea
                   {...field}
-                  error={!!fieldErrors.description}
-                  hint={fieldErrors.description}
+                  error={!!errors.fieldErrors.description}
+                  hint={errors.fieldErrors.description}
                 />
               )}
             />
@@ -152,7 +160,7 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
               render={({ field }) => (
                 <PrioritySelect
                   onChange={value => field.onChange(value)}
-                  error={!!fieldErrors.priority}
+                  error={!!errors.fieldErrors.priority}
                   value={getValues('priority')}
                 />
               )}
@@ -170,7 +178,7 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
                 <AddressSelect
                   defaultAddressId={getValues('address.addressId')!}
                   disabled={!customerId}
-                  addresses={options.getByIdCustomerAddressList(customerId).data?.items}
+                  addresses={data.getCustomerAddresses(customerId).data?.items}
                   onClick={openModal}
                   onChange={selected => {
                     const address: BaseAddress = selected!;
@@ -197,8 +205,8 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
             <AssignmentSelect
               defaultId={service?.employeeId ? service.employeeId : service?.teamId}
               defaultType={service?.employeeId ? 'personel' : service?.teamId ? 'team' : 'none'}
-              personnelList={options.employees?.items}
-              teamList={options.teams?.items}
+              personnelList={data.employees?.items}
+              teamList={data.teams?.items}
               onChange={(value, type) => {
                 if (type === 'personel') {
                   setValue('employeeId', value!);
@@ -220,7 +228,12 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
 
       {/* Kaydet Butonu */}
       <div className="flex justify-end">
-        <Button size="sm" onClick={handleSubmit(handleServiceSubmit)} children={'Kaydet'} />
+        <UpdateModalButton
+          message={ServiceMessages.updateService}
+          onConfirm={handleSubmit(handleServiceSubmit)}
+          onSubmitting={state.isSubmitting}
+          onSuccess={state.isSubmitSuccess}
+        />
       </div>
       <AddressAddModal isOpen={isOpen} onClose={closeModal} customerId={customerId} />
     </div>

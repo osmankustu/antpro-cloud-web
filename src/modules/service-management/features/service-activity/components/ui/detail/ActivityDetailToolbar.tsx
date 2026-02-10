@@ -1,5 +1,5 @@
+import { DeleteModal } from '@/components/ui/button/DeleteModalButton';
 import ToolbarButton from '@/components/ui/button/ToolbarButton';
-import { DeleteModal } from '@/components/ui/modals/DeleteModal';
 import { ServiceMessages } from '@/modules/service-management/constants/serviceMessages';
 import { ActivityModel } from '@/modules/service-management/types/activity.types';
 import { ServiceModel } from '@/modules/service-management/types/service.types';

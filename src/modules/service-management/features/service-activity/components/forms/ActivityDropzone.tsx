@@ -141,6 +141,9 @@ export function ActivityDropzone({ onChange, isSubmitting }: ActivityDropzonePro
                   style={{ width: `${progress}%` }}
                 />
               </div>
+              <div className="mb-2 text-center text-sm font-semibold text-white">
+                Lütfen sayfayı kapatmayınız !
+              </div>
             </div>
           </div>
         )}

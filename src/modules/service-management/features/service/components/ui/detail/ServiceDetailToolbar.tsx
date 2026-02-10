@@ -1,7 +1,7 @@
 'use client';
 
+import { DeleteModal } from '@/components/ui/button/DeleteModalButton';
 import ServiceStatus from '@/components/ui/indicators/ServiceStatus';
-import { DeleteModal } from '@/components/ui/modals/DeleteModal';
 import { ServiceMessages } from '@/modules/service-management/constants/serviceMessages';
 import { ServiceModel } from '@/modules/service-management/types/service.types';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';

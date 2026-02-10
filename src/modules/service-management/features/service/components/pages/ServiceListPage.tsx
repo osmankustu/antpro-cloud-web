@@ -2,30 +2,19 @@ import { ServiceMobileList } from '@/modules/service-management/features/service
 import { ServiceTable } from '@/modules/service-management/features/service/components/ui/ServiceTable';
 import { ServiceToolbar } from '@/modules/service-management/features/service/components/ui/ServiceToolbar';
 import { useRouter } from 'next/navigation';
-import { useServices } from '../../hooks/useServices';
 
 export default function ServiceListPage() {
   const router = useRouter();
-  const { services, isLoading, isFetching, error, handleRetry, loadMore } = useServices();
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-3 pt-3 pb-3 sm:px-6 sm:pt-4 dark:border-gray-800 dark:bg-white/[0.03]">
-      <ServiceToolbar router={router} />
-      <ServiceMobileList
-        isLoading={isLoading}
-        isFetching={isFetching}
-        error={error}
-        services={services}
-        router={router}
-      />
-      <ServiceTable
-        isLoading={isLoading}
-        isFetching={isFetching}
-        error={error}
-        services={services}
-        router={router}
-        onRetry={handleRetry}
-      />
-    </div>
+    <>
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-3 pt-3 pb-3 sm:px-6 sm:pt-4 dark:border-gray-800 dark:bg-white/[0.03]">
+        <ServiceToolbar router={router} />
+        <ServiceMobileList router={router} />
+      </div>
+      <div>
+        <ServiceTable router={router} />
+      </div>
+    </>
   );
 }

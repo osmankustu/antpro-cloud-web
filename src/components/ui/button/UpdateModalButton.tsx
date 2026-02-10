@@ -1,17 +1,23 @@
 import { Message } from '@/core/utils/messages/types';
 import { useModal } from '@/hooks/useModal';
 import { useEffect } from 'react';
-import ToolbarButton from '../button/ToolbarButton';
+import { AiFillSave } from 'react-icons/ai';
 import { Modal } from '../modal';
+import Button from './Button';
 
 interface DeleteModalProps {
   message: Message;
   onConfirm: () => void;
-  onDeleting?: boolean;
   onSuccess?: boolean;
+  onSubmitting?: boolean;
 }
 
-export function DeleteModal({ message, onConfirm, onDeleting, onSuccess }: DeleteModalProps) {
+export function UpdateModalButton({
+  message,
+  onConfirm,
+  onSubmitting,
+  onSuccess,
+}: DeleteModalProps) {
   const { openModal, isOpen, closeModal } = useModal();
 
   useEffect(() => {
@@ -20,25 +26,13 @@ export function DeleteModal({ message, onConfirm, onDeleting, onSuccess }: Delet
 
   return (
     <>
-      <ToolbarButton active={false} onClick={openModal} children={'Sil'} />
+      <Button disabled={onSubmitting} size="sm" onClick={openModal} children={'Kaydet'} />
 
       <Modal isOpen={isOpen} onClose={closeModal} showCloseButton className="m-4 max-w-[520px]">
         <div className="relative w-full rounded-3xl bg-white p-6 sm:p-8 dark:bg-gray-900">
           {/* ICON */}
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-            <svg
-              className="h-6 w-6 text-red-600 dark:text-red-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m2 0H7m3-3h4a1 1 0 011 1v1H9V5a1 1 0 011-1z"
-              />
-            </svg>
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-red-900/30">
+            <AiFillSave size={30} />
           </div>
 
           {/* TITLE */}
@@ -63,10 +57,10 @@ export function DeleteModal({ message, onConfirm, onDeleting, onSuccess }: Delet
 
             <button
               onClick={onConfirm}
-              disabled={onDeleting}
-              className="inline-flex items-center justify-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
+              disabled={onSubmitting}
+              className="inline-flex items-center justify-center rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
             >
-              {onDeleting ? 'Siliniyor...' : 'Evet, Sil'}
+              {onSubmitting ? 'Kaydediliyor...' : 'Evet, Kaydet'}
             </button>
           </div>
         </div>

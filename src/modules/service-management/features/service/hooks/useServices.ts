@@ -1,6 +1,5 @@
 import { ResponseError } from '@/core/connection/types/error/errorResponse';
 import { useAppDispatch, useAppSelector } from '@/core/store/base/hook';
-import { Toast } from '@/core/utils/toast/toast';
 import { useCustomerSharedEndpoints } from '@/modules/customer-management/hooks/useCustomerSharedEndpoints';
 import {
   setServiceDynamicQuery,
@@ -12,9 +11,9 @@ import {
   useGetServicesQuery,
 } from '../../../endpoints/service.endpoints';
 
-export function useServices(pageSize: number = 20) {
-  //Service List (paginate)
+type ListMode = 'infinite' | 'pagination';
 
+export function useServices(pageSize: number = 2, mode: ListMode = 'pagination') {
   const [error, setError] = useState<ResponseError | undefined>(undefined);
 
   const dispatch = useAppDispatch();
@@ -27,28 +26,18 @@ export function useServices(pageSize: number = 20) {
   // Query Args
   const queryArgs = { pageIndex, pageSize };
 
-  const { getAllCustomer } = useCustomerSharedEndpoints();
+  const customerEndpoints = useCustomerSharedEndpoints();
   // Customers
-  const {
-    data: customers,
-    isFetching: customerFetching,
-    error: customerError,
-    refetch: refetchCustomer,
-  } = getAllCustomer;
+  const customers = customerEndpoints.getAllCustomer;
 
   // Services Query
-  const {
-    data,
-    isFetching: queryFetching,
-    isLoading,
-    error: queryError,
-    refetch: refetchServices,
-  } = isDynamic && dynamicQuery
-    ? useGetServicesByDynamicQuery({ ...queryArgs, query: dynamicQuery })
-    : useGetServicesQuery(queryArgs);
+  const servicesQuery =
+    isDynamic && dynamicQuery
+      ? useGetServicesByDynamicQuery({ ...queryArgs, query: dynamicQuery })
+      : useGetServicesQuery(queryArgs);
 
-  const endpointError = (queryError || customerError) as ResponseError;
-  const isFetching = queryFetching || customerFetching;
+  // const endpointError = (queryError || customerError) as ResponseError;
+  // const isFetching = queryFetching || customerFetching;
 
   // Mount — reset filters + list
   useEffect(() => {
@@ -60,11 +49,11 @@ export function useServices(pageSize: number = 20) {
 
   // Show API Errors once
 
-  useEffect(() => {
-    if (!endpointError) return;
-    setError(endpointError);
-    Toast.error(endpointError.title);
-  }, [endpointError]);
+  // useEffect(() => {
+  //   if (!endpointError) return;
+  //   setError(endpointError);
+  //   Toast.error(endpointError.title);
+  // }, [endpointError]);
 
   // On Filter Change → Reset List
   useEffect(() => {
@@ -74,26 +63,40 @@ export function useServices(pageSize: number = 20) {
 
   // Merge services + customers
   useEffect(() => {
-    if (!data || !customers) return;
+    if (!servicesQuery.data || !customers) return;
 
-    const customerMap = new Map(customers.items.map(c => [c.id, c.fullName]));
+    const customerMap = new Map(customers.data?.items.map(c => [c.id, c.fullName]));
 
-    const merged = data.items.map(service => ({
+    const merged = servicesQuery.data?.items.map(service => ({
       ...service,
       customerName: customerMap.get(service.customerId) || 'Bilinmeyen Müşteri',
     }));
 
     setServices(prev => {
+      if (mode === 'pagination') {
+        return merged; // 🔥 desktop için temiz reset
+      }
+
       const newItems = merged.filter(item => !prev.some(p => p.id === item.id));
       return pageIndex === 0 ? merged : [...prev, ...newItems];
     });
-  }, [data, customers, pageIndex]);
+  }, [servicesQuery.data, customers, pageIndex, mode]);
 
   // Load more
-  const loadMore = () => {
-    if (!isFetching && data && data.items.length === pageSize) {
+  const loadMoreAction = () => {
+    if (mode !== 'infinite') return;
+
+    if (
+      !servicesQuery.isFetching &&
+      servicesQuery.data &&
+      servicesQuery.data.items.length === pageSize
+    ) {
       setPageIndex(prev => prev + 1);
     }
+  };
+
+  const goToPageAction = (page: number) => {
+    setPageIndex(page);
   };
 
   // Filter apply
@@ -103,26 +106,37 @@ export function useServices(pageSize: number = 20) {
   };
 
   // Retry
-  const handleRetry = () => {
+  const retryAction = () => {
     setError(undefined);
-    refetchCustomer();
-    refetchServices();
+    servicesQuery.refetch();
+    customers.refetch();
   };
 
   // Pull to refresh
-  const handleRefresh = async () => {
+  const refreshAction = async () => {
     setPageIndex(0);
   };
 
   return {
-    services,
-    isLoading,
-    isFetching,
-    error,
-    customers,
-    applyFilters,
-    loadMore,
-    handleRetry,
-    handleRefresh,
+    data: {
+      services,
+      pagination: {
+        pageCount: servicesQuery.data?.pages,
+        currentPage: servicesQuery.data?.index,
+      },
+    },
+    state: {
+      servicesState: servicesQuery,
+    },
+    errors: {
+      error,
+    },
+    actions: {
+      goToPage: goToPageAction,
+      loadMore: loadMoreAction,
+      retry: retryAction,
+      refresh: refreshAction,
+      applyFilters,
+    },
   };
 }

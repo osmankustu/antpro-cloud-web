@@ -1,23 +1,50 @@
 import Button from '@/components/ui/button/Button';
-import { ResponseError } from '@/core/connection/types/error/errorResponse';
 import { formatDate } from '@/core/utils/formatters/dateFormatter';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import { useEffect, useRef } from 'react';
 import ProiortyStatus from '../../../../../../components/ui/indicators/PriortyStatus';
 import ServiceStatus from '../../../../../../components/ui/indicators/ServiceStatus';
-import { ServiceModel } from '../../../../types/service.types';
+import { useServices } from '../../hooks/useServices';
 
-type Props = {
-  services?: ServiceModel[];
-  isLoading?: boolean;
-  isFetching?: boolean;
-  error?: ResponseError;
+type ServiceMobileListProps = {
   router: AppRouterInstance;
 };
 
-export function ServiceMobileList({ services, isLoading, isFetching, error, router }: Props) {
-  const showSpinner = isLoading || (isFetching && !services);
-  const showEmpty = !isLoading && !isFetching && !error && services && services.length === 0;
-  const showError = !isLoading && !isFetching && error;
+export function ServiceMobileList({ router }: ServiceMobileListProps) {
+  const { data, state, errors, actions } = useServices(10, 'infinite');
+  const hasMore = true;
+
+  const showSpinner = state.servicesState.isLoading || state.servicesState.isFetching;
+  const showEmpty =
+    !state.servicesState.isLoading &&
+    !state.servicesState.isFetching &&
+    !errors.error &&
+    data.services?.length === 0;
+  const showError =
+    !state.servicesState.isLoading && !state.servicesState.isFetching && errors.error;
+
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!loaderRef.current) return;
+    if (!hasMore) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && !state.servicesState.isFetching) {
+          actions.loadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: '120px',
+        threshold: 0.1,
+      },
+    );
+
+    observer.observe(loaderRef.current);
+    return () => observer.disconnect();
+  }, [actions.loadMore, state.servicesState.isFetching, hasMore]);
 
   return (
     <div className="grid gap-3 md:hidden">
@@ -30,7 +57,9 @@ export function ServiceMobileList({ services, isLoading, isFetching, error, rout
       {showError ? (
         <div className="rounded-xl border border-gray-200 p-4 text-center dark:border-gray-800">
           <div>
-            <p className="text-sm font-medium text-gray-800 dark:text-white/90">{error.detail}</p>
+            <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+              {errors.error?.detail}
+            </p>
           </div>
         </div>
       ) : showEmpty ? (
@@ -42,7 +71,7 @@ export function ServiceMobileList({ services, isLoading, isFetching, error, rout
           </div>
         </div>
       ) : (
-        services?.map(service => (
+        data.services?.map(service => (
           <div
             key={service.id}
             className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03]"
@@ -90,6 +119,14 @@ export function ServiceMobileList({ services, isLoading, isFetching, error, rout
             </div>
           </div>
         ))
+      )}
+      {/* Infinite scroll sentinel */}
+      {hasMore && (
+        <div ref={loaderRef} className="flex h-14 items-center justify-center">
+          {state.servicesState.isFetching && data.services && (
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700 dark:border-gray-600 dark:border-t-white" />
+          )}
+        </div>
       )}
     </div>
   );

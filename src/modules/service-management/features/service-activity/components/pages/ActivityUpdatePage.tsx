@@ -1,9 +1,10 @@
 import TextArea from '@/components/form/input/TextArea';
-import Button from '@/components/ui/button/Button';
+import { UpdateModalButton } from '@/components/ui/button/UpdateModalButton';
 import { useAppSelector } from '@/core/store/base/hook';
 import FormField from '@/modules/service-management/components/forms/FormField';
 import { ServiceStatusSelect } from '@/modules/service-management/components/forms/ServiceStatusSelect';
 import { FullRow, Section } from '@/modules/service-management/components/ui/detail';
+import { ServiceMessages } from '@/modules/service-management/constants/serviceMessages';
 import {
   ActivityModel,
   ActivityUpdateModel,
@@ -20,26 +21,13 @@ interface ActivityUpdatePageProps {
 }
 
 export function ActivityUpdatePage({ activity, service }: ActivityUpdatePageProps) {
-  const {
-    handleUpdateActivity,
-    isSubmitting,
-    activitySuccess,
-    documentSuccess,
-    error,
-    fieldErrors,
-  } = useUpdateActivity(service?.id);
+  const { actions, state, error } = useUpdateActivity(service?.id);
+  const progress = useAppSelector(s => s.ui.uploadProgress);
 
   const employee = useAppSelector(s => s.auth.user);
   const [files, setFiles] = useState<File[]>([]);
   const { control, reset, getValues, handleSubmit } = useForm<ActivityUpdateModel>({
-    defaultValues: {
-      //   description: activity?.description ?? '',
-      //   status: activity?.status ?? '',
-      //   employeeId: employee?.employeeId ?? '',
-      //   id: activity?.id ?? '',
-      //   poolId: activity?.poolId ?? '',
-      //   createdDate: activity?.createdDate ?? '',
-    },
+    defaultValues: {},
   });
 
   useEffect(() => {
@@ -53,10 +41,10 @@ export function ActivityUpdatePage({ activity, service }: ActivityUpdatePageProp
         createdDate: activity?.createdDate ?? '',
       });
     }
-  }, [activity]);
+  }, [activity, employee]);
 
   const handleActivitySubmit = async (data: ActivityUpdateModel) => {
-    handleUpdateActivity(data, files);
+    actions.updateActivity(data, files);
   };
 
   return (
@@ -85,13 +73,16 @@ export function ActivityUpdatePage({ activity, service }: ActivityUpdatePageProp
           </FormField>
         </FullRow>
       </Section>
-      <ActivityDropzone onChange={value => setFiles(value)} isSubmitting={isSubmitting} />
+      <ActivityDropzone
+        onChange={value => setFiles(value)}
+        isSubmitting={state.documentState.isLoading}
+      />
       <div className="flex justify-end">
-        <Button
-          size="sm"
-          onClick={handleSubmit(handleActivitySubmit)}
-          children={'Kaydet'}
-          disabled={isSubmitting}
+        <UpdateModalButton
+          message={ServiceMessages.updateActivity}
+          onConfirm={handleSubmit(handleActivitySubmit)}
+          onSubmitting={state.documentState.isLoading || state.activityState.isLoading}
+          onSuccess={state.activityState.isSuccess && progress === 100}
         />
       </div>
     </div>

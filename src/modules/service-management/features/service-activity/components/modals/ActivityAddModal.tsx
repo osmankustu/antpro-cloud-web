@@ -30,6 +30,7 @@ export function ActivityAddModal({ service }: ActivityAddModalProps) {
       status: '',
     },
   });
+  const { actions, state, error } = useAddActivity(service?.id);
 
   useEffect(() => {
     reset({
@@ -37,18 +38,22 @@ export function ActivityAddModal({ service }: ActivityAddModalProps) {
       poolId: service?.poolId,
       description: '',
     });
-  }, []);
-  const { handleAddActivity, fieldErrors, isSubmitting, error, activitySuccess, documentSuccess } =
-    useAddActivity(service?.id);
+  }, [employee, service]);
 
   useEffect(() => {
-    if (documentSuccess && activitySuccess) {
-      closeModal();
+    if (files && files.length > 0) {
+      if (state.documentState.isSuccess && state.activityState.isSuccess) {
+        closeModal();
+      }
+    } else {
+      if (state.activityState.isSuccess) {
+        closeModal();
+      }
     }
-  }, [documentSuccess, activitySuccess]);
+  }, [state.documentState.isSuccess, state.activityState.isSuccess]);
 
   const handleActivitySubmit = (data: ActivityAddModel) => {
-    handleAddActivity(data, files);
+    actions.addActivity(data, files);
   };
 
   return (
@@ -80,12 +85,19 @@ export function ActivityAddModal({ service }: ActivityAddModalProps) {
             </FormField>
           </FormSection>
 
-          <ActivityDropzone onChange={files => setFiles(files)} isSubmitting={isSubmitting} />
+          <ActivityDropzone
+            onChange={files => setFiles(files)}
+            isSubmitting={state.documentState.isLoading}
+          />
           <div className="mt-6 flex items-center gap-3 px-2 lg:justify-end">
             <Button size="sm" variant="outline" onClick={closeModal}>
               Kapat
             </Button>
-            <Button size="sm" onClick={handleSubmit(handleActivitySubmit)} disabled={isSubmitting}>
+            <Button
+              size="sm"
+              onClick={handleSubmit(handleActivitySubmit)}
+              disabled={state.documentState.isLoading || state.activityState.isLoading}
+            >
               Oluştur
             </Button>
           </div>
