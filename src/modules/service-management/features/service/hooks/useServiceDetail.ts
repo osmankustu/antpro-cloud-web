@@ -11,91 +11,82 @@ import { useEffect, useState } from 'react';
 export function useServiceDetail(id: string) {
   const [error, setError] = useState<ResponseError | undefined>(undefined);
 
-  const { getAllEmployees, getAllTeams } = useStaffSharedEndpoints();
-  const { getAllCustomer } = useCustomerSharedEndpoints();
+  const staffEndpoints = useStaffSharedEndpoints();
+  const customerEndpoints = useCustomerSharedEndpoints();
+  const customersQuery = customerEndpoints.getAllCustomer;
+  const employeesQuery = staffEndpoints.getAllEmployees;
+  const teamsQuery = staffEndpoints.getAllTeams;
+  const serviceQuery = useGetServiceByIdQuery(id);
+  const [deleteService, deleteSubmitState] = useDeleteServiceMutation();
 
-  const {
-    data: customers,
-    isFetching: customerFetching,
-    isLoading: customerLoading,
-    error: customersError,
-    refetch: customerRefetch,
-  } = getAllCustomer;
+  const fetchError = (employeesQuery.error ||
+    teamsQuery.error ||
+    customersQuery.error ||
+    serviceQuery.error) as ResponseError | undefined;
 
-  const {
-    data: employees,
-    isFetching: employeesFetching,
-    isLoading: employeesLoading,
-    error: employeesError,
-    refetch: employeesRefetch,
-  } = getAllEmployees;
+  console.log('Fetch Error', fetchError);
 
-  const {
-    data: teams,
-    isFetching: teamsFetching,
-    isLoading: teamsLoading,
-    error: teamsError,
-    refetch: teamRefetch,
-  } = getAllTeams;
-
-  const {
-    data: service,
-    isFetching: serviceFetching,
-    isLoading: serviceLoading,
-    error: servicesError,
-    refetch: serviceRefetch,
-  } = useGetServiceByIdQuery(id);
-
-  const [deleteService, { error: deleteError, isLoading: isDeleting }] = useDeleteServiceMutation();
-
-  const endpointError = (employeesError ||
-    teamsError ||
-    customersError ||
-    servicesError ||
-    deleteError) as ResponseError;
-
-  const isFetching = employeesFetching || teamsFetching || customerFetching || serviceFetching;
-  const isLoading = employeesLoading || teamsLoading || serviceLoading || customerLoading;
-
-  const handleDelete = async () => {
-    await deleteService(id).unwrap();
-    Toast.success('Servis Silindi');
+  const deleteAction = async () => {
+    try {
+      await deleteService(id).unwrap();
+      Toast.success('Servis Silindi');
+    } catch (error) {
+      setError(error as ResponseError);
+      const err = error as ResponseError;
+      Toast.error(err.title || 'Aktivite Silindi');
+    }
   };
 
-  // Show API Errors once
   useEffect(() => {
-    if (!endpointError) return;
-    setError(endpointError);
-    Toast.error(endpointError?.title);
-  }, [endpointError]);
+    if (!fetchError) return;
+    setError(fetchError as ResponseError);
+    Toast.error(error?.title);
+  }, [fetchError]);
 
-  const refetch = async () => {
+  const refetchAction = async () => {
     setError(undefined);
-    await customerRefetch();
-    await employeesRefetch();
-    await teamRefetch();
-    await serviceRefetch();
+    Promise.all([
+      serviceQuery.refetch(),
+      teamsQuery.refetch(),
+      employeesQuery.refetch(),
+      customersQuery.refetch(),
+    ]);
   };
 
   const assignedName =
-    service?.employeeId !== null
-      ? employees?.items.find(p => p.id === service?.employeeId)?.fullName
-      : service?.teamId !== null
-        ? teams?.items.find(t => t.id === service.teamId)?.fullName
+    serviceQuery.data?.employeeId !== null
+      ? employeesQuery.data?.items.find(p => p.id === serviceQuery.data?.employeeId)?.fullName
+      : serviceQuery.data?.teamId !== null
+        ? teamsQuery.data?.items.find(t => t.id === serviceQuery.data?.teamId)?.fullName
         : 'Atanmamış';
 
-  const customerName = customers?.items.find(c => c.id === service?.customerId)?.fullName;
-  const customerId = customers?.items.find(c => c.id === service?.customerId)?.id;
+  const customerName = customersQuery.data?.items.find(
+    c => c.id === serviceQuery.data?.customerId,
+  )?.fullName;
+  const customerId = customersQuery.data?.items.find(
+    c => c.id === serviceQuery.data?.customerId,
+  )?.id;
 
   return {
-    service,
-    isFetching,
-    isLoading,
-    isDeleting,
-    error,
-    refetch,
-    handleDelete,
-    assignedName,
-    customerName,
+    data: {
+      service: serviceQuery.data,
+      assignedName: assignedName,
+      customerName: customerName,
+      customerId: customerId,
+    },
+    state: {
+      serviceState: serviceQuery,
+      customerState: customersQuery,
+      employeesState: employeesQuery,
+      teamsState: teamsQuery,
+      deleteState: deleteSubmitState,
+    },
+    errors: {
+      error,
+    },
+    actions: {
+      delete: deleteAction,
+      refetch: refetchAction,
+    },
   };
 }

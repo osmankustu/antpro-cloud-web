@@ -1,7 +1,9 @@
 'use client';
 import ToolbarButton from '@/components/ui/button/ToolbarButton';
+import { useAppSelector } from '@/core/store/base/hook';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 
 interface ServiceDetailToolbarProps {
   isLoading?: boolean;
@@ -19,6 +21,8 @@ export function DashboardToolbar({
   onRetry,
 }: ServiceDetailToolbarProps) {
   const pathname = usePathname();
+  const userName = useAppSelector(s => s.auth.user?.fullName);
+  useEffect(() => {}, [userName]);
 
   const isDashboard = pathname.endsWith('/management');
   const isServiceStats = pathname.endsWith('/management/service-stats');
@@ -30,7 +34,7 @@ export function DashboardToolbar({
         {/* Left */}
         <div>
           <h5 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            👋 Merhaba Osman KUŞTU
+            👋 Merhaba {userName}
           </h5>
 
           {isLoading || isFetching ? (

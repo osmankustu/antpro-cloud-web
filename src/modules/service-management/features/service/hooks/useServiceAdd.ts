@@ -9,12 +9,10 @@ import { useEffect, useState } from 'react';
 export default function useServiceAdd() {
   const customerEndpoints = useCustomerSharedEndpoints();
   const staffEndpoints = useStaffSharedEndpoints();
-
   const corporate = customerEndpoints.getCorporateOptions;
   const individual = customerEndpoints.getIndividualOptions;
   const employeesQuery = staffEndpoints.getAllEmployees;
   const teamsQuery = staffEndpoints.getAllTeams;
-
   const [formError, setFormError] = useState<ResponseError>();
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ServiceAddModel, string>>>(
     {},

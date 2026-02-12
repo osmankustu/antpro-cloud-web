@@ -113,7 +113,7 @@ export const AuthManager = {
   logout: async () => {
     const token = rootStore.getState().auth.token?.token;
     try {
-      await AuthService.revoke(token);
+      await AuthService.revoke();
     } catch {
       // swallow
     }

@@ -1,6 +1,6 @@
 import Pagination from '@/components/tables/Pagination';
-import Button from '@/components/ui/button/Button';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
+import { RowActions } from '@/components/ui/table/RowActions';
 import { formatDate } from '@/core/utils/formatters/dateFormatter';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import ProiortyStatus from '../../../../../../components/ui/indicators/PriortyStatus';
@@ -25,7 +25,7 @@ export function ServiceTable({ router }: ServiceTableProps) {
 
   return (
     <>
-      <div className='dark:bg-white/[0.03]" relative mt-5 hidden max-w-full overflow-hidden overflow-x-auto rounded-2xl border border-gray-200 bg-white px-3 pt-3 pb-3 sm:px-6 sm:pt-4 md:block dark:border-gray-800'>
+      <div className="relative mt-5 hidden max-w-full overflow-hidden overflow-x-auto rounded-2xl border border-gray-200 bg-white px-3 pt-3 pb-3 sm:px-6 sm:pt-4 md:block dark:border-gray-800 dark:bg-white/[0.03]">
         <div className="">
           {/* Local spinner */}
           {showSpinner && (
@@ -116,13 +116,11 @@ export function ServiceTable({ router }: ServiceTableProps) {
                     </TableCell>
 
                     <TableCell className="sm:text-theme-sm py-2 text-xs sm:py-3">
-                      <Button
-                        size="sm"
-                        className="w-full sm:w-auto"
-                        onClick={() => router.push(`service-management/${service.id}`)}
-                      >
-                        Detay
-                      </Button>
+                      <RowActions
+                        onDetail={() => router.push(`service-management/${service.id}`)}
+                        onDelete={() => {}}
+                        onEdit={() => router.push(`service-management/${service.id}/edit-service`)}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

@@ -4,15 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
-import {
-  FcConferenceCall,
-  FcContacts,
-  FcDocument,
-  FcLineChart,
-  FcManager,
-  FcSettings,
-} from 'react-icons/fc';
+import { FcContacts, FcDocument, FcLineChart } from 'react-icons/fc';
 import { HiDotsHorizontal } from 'react-icons/hi';
+import { IoMdCloudy } from 'react-icons/io';
 import { useSidebar } from '../context/SidebarContext';
 
 type NavItem = {
@@ -36,17 +30,17 @@ const navItems: NavItem[] = [
       { name: 'Servis Kayıtları', path: '/management/service-management' },
     ],
   },
-  {
-    icon: <FcConferenceCall size={27} />,
-    name: 'Çalışan Yönetimi',
+  // {
+  //   icon: <FcConferenceCall size={27} />,
+  //   name: 'Çalışan Yönetimi',
 
-    path: 'management/employees',
-    subItems: [
-      { name: 'Personeller', path: '/management/employee-management/personels' },
-      { name: 'Ekipler', path: '/management/employee-management/teams' },
-      { name: 'Departmanlar', path: '/management/employee-management/departments' },
-    ],
-  },
+  //   path: 'management/employees',
+  //   subItems: [
+  //     { name: 'Personeller', path: '/management/employee-management/personels' },
+  //     { name: 'Ekipler', path: '/management/employee-management/teams' },
+  //     { name: 'Departmanlar', path: '/management/employee-management/departments' },
+  //   ],
+  // },
   {
     icon: <FcContacts size={27} />,
     name: 'Müşteri Yönetimi',
@@ -69,19 +63,19 @@ const navItems: NavItem[] = [
   //     { name: "Geçmiş İşlemlerim", path: "" },
   //   ],
   // },
-  {
-    icon: <FcManager size={27} />,
-    name: 'Hesabım',
-    path: '/management/account',
-  },
-  {
-    icon: <FcSettings size={27} />,
-    name: 'Ayarlar',
-    subItems: [
-      // { name: "İşletme Bilgileri", path: "/management/settings/info" },
-      { name: 'Kullanıcı Yetkileri', path: '/management/settings/permissions' },
-    ],
-  },
+  // {
+  //   icon: <FcManager size={27} />,
+  //   name: 'Hesabım',
+  //   path: '/management/account',
+  // },
+  // {
+  //   icon: <FcSettings size={27} />,
+  //   name: 'Ayarlar',
+  //   subItems: [
+  //     // { name: "İşletme Bilgileri", path: "/management/settings/info" },
+  //     { name: 'Kullanıcı Yetkileri', path: '/management/settings/permissions' },
+  //   ],
+  // },
 ];
 
 const othersItems: NavItem[] = [
@@ -309,20 +303,28 @@ const AppSidebar: React.FC = () => {
         <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
-              <Image
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <Image
+              <div className="flex gap-2">
+                {/* <Image
+                  className="dark:hidden"
+                  src="/images/logo/logo.svg"
+                  alt="Logo"
+                  width={150}
+                  height={40}
+                /> */}
+
+                <IoMdCloudy size={38} className="text-2xl text-blue-500" />
+                <div className="text-center text-2xl font-bold text-blue-500 dark:text-white">
+                  <p>AntPro Cloud</p>
+                </div>
+              </div>
+
+              {/* <Image
                 className="hidden dark:block"
                 src="/images/logo/logo-dark.svg"
                 alt="Logo"
                 width={150}
                 height={40}
-              />
+              /> */}
             </>
           ) : (
             <Image src="/images/logo/logo-icon.svg" alt="Logo" width={32} height={32} />

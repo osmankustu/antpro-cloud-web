@@ -1,6 +1,6 @@
-import Button from '@/components/ui/button/Button';
 import ServiceStatus from '@/components/ui/indicators/ServiceStatus';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
+import { RowActions } from '@/components/ui/table/RowActions';
 import { ResponseError } from '@/core/connection/types/error/errorResponse';
 import { formatDate } from '@/core/utils/formatters/dateFormatter';
 import { ActivityModel } from '@/modules/service-management/types/activity.types';
@@ -113,7 +113,11 @@ export function ActivityTable({
                 </TableCell>
 
                 <TableCell className="sm:text-theme-sm py-2 text-xs sm:py-3">
-                  <Button onClick={() => router.push(`activities/${activity.id}`)}>Detay</Button>
+                  <RowActions
+                    onDetail={() => router.push(`activities/${activity.id}`)}
+                    onEdit={() => router.push(`activities/${activity.id}/edit-activity`)}
+                    onDelete={() => {}}
+                  />
                 </TableCell>
               </TableRow>
             ))}

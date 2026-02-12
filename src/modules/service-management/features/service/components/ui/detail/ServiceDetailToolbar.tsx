@@ -52,7 +52,7 @@ export function ServiceDetailToolbar({
             </button>
           ) : (
             <p className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              {customerName} • <ServiceStatus size="sm" serviceStatus={service!.status} />
+              {customerName} • <ServiceStatus size="sm" serviceStatus={service?.status} />
             </p>
           )}
         </div>

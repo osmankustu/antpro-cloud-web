@@ -1,5 +1,5 @@
-import Button from '@/components/ui/button/Button';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
+import { RowActions } from '@/components/ui/table/RowActions';
 import { ResponseError } from '@/core/connection/types/error/errorResponse';
 import { formatDate } from '@/core/utils/formatters/dateFormatter';
 import { DocumentModel } from '@/modules/service-management/types/document.types';
@@ -119,10 +119,12 @@ export function DocumentTable({
                 </TableCell>
 
                 {/* İşlemler */}
-                <TableCell className="sm:text-theme-sm py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
-                  <Button size="sm" variant="outline" onClick={() => onView(doc)}>
-                    Görüntüle
-                  </Button>
+                <TableCell className="sm:text-theme-sm z-10 py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
+                  <RowActions
+                    onView={() => onView(doc)}
+                    onDelete={() => {}}
+                    onDownload={() => {}}
+                  />
                 </TableCell>
               </TableRow>
             ))}

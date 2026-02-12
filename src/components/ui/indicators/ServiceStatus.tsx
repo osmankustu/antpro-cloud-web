@@ -1,7 +1,7 @@
 import Badge from '@/components/ui/badge/Badge';
 
 interface ServiceStatusProps {
-  serviceStatus: string;
+  serviceStatus?: string;
   size: 'sm' | 'md';
   variant?: 'solid' | 'light';
 }
@@ -22,7 +22,7 @@ const STATUS_MAP: Record<
 };
 
 const ServiceStatus = ({ serviceStatus, size, variant }: ServiceStatusProps) => {
-  const status = STATUS_MAP[serviceStatus];
+  const status = STATUS_MAP[serviceStatus ?? ''];
 
   if (!status) {
     return (

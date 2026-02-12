@@ -1,6 +1,6 @@
 import axiosClient from '@/core/connection/axios/base/axiosClient';
-import { LoginRequest } from '../types/requests/loginRequest';
 import { axiosRawClient } from '@/core/connection/axios/base/axiosRawClient';
+import { LoginRequest } from '../types/requests/loginRequest';
 
 export const AuthService = {
   login: (credentials: LoginRequest) => axiosClient.post('/auth/login', credentials),

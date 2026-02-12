@@ -15,17 +15,24 @@ export function ServiceDetailProvider({ serviceId, children }: Props) {
   const query = useServiceDetail(serviceId);
   const value = useMemo(
     () => ({
-      service: query.service,
-      customerName: query.customerName,
-      assignedName: query.assignedName,
-      isLoading: query.isLoading,
-      isFetching: query.isFetching,
-      isDeleting: query.isDeleting,
-      error: query.error,
-      refetch: query.refetch,
-      handleDelete: query.handleDelete,
+      service: query.data.service,
+      customerName: query.data.customerName,
+      assignedName: query.data.assignedName,
+      isLoading: query.state.serviceState.isLoading,
+      isFetching: query.state.serviceState.isFetching,
+      isDeleting: query.state.deleteState.isLoading,
+      error: query.errors.error,
+      refetch: query.actions.refetch,
+      handleDelete: query.actions.delete,
     }),
-    [query.service, query.isLoading, query.isFetching, query.error, query.refetch],
+    [
+      query.data.service,
+      query.state.serviceState.isLoading,
+      query.state.serviceState.isFetching,
+      query.errors.error,
+      query.actions.refetch,
+      query.actions.delete,
+    ],
   );
 
   return (

@@ -1,5 +1,6 @@
 import { ResponseError } from '@/core/connection/types/error/errorResponse';
 import { useAppDispatch, useAppSelector } from '@/core/store/base/hook';
+import { Toast } from '@/core/utils/toast/toast';
 import { useCustomerSharedEndpoints } from '@/modules/customer-management/hooks/useCustomerSharedEndpoints';
 import {
   setServiceDynamicQuery,
@@ -27,17 +28,13 @@ export function useServices(pageSize: number = 2, mode: ListMode = 'pagination')
   const queryArgs = { pageIndex, pageSize };
 
   const customerEndpoints = useCustomerSharedEndpoints();
-  // Customers
   const customers = customerEndpoints.getAllCustomer;
-
-  // Services Query
   const servicesQuery =
     isDynamic && dynamicQuery
       ? useGetServicesByDynamicQuery({ ...queryArgs, query: dynamicQuery })
       : useGetServicesQuery(queryArgs);
 
-  // const endpointError = (queryError || customerError) as ResponseError;
-  // const isFetching = queryFetching || customerFetching;
+  const fetchError = (customers.error || servicesQuery.error) as ResponseError;
 
   // Mount — reset filters + list
   useEffect(() => {
@@ -49,11 +46,11 @@ export function useServices(pageSize: number = 2, mode: ListMode = 'pagination')
 
   // Show API Errors once
 
-  // useEffect(() => {
-  //   if (!endpointError) return;
-  //   setError(endpointError);
-  //   Toast.error(endpointError.title);
-  // }, [endpointError]);
+  useEffect(() => {
+    if (!fetchError) return;
+    setError(fetchError);
+    Toast.error(error?.title);
+  }, [fetchError]);
 
   // On Filter Change → Reset List
   useEffect(() => {

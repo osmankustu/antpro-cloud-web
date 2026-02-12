@@ -10,49 +10,32 @@ import { useEffect, useMemo, useState } from 'react';
 
 export function useActivityDetail(activityId: string) {
   const [error, setError] = useState<ResponseError | undefined>(undefined);
-  const { getAllEmployees } = useStaffSharedEndpoints();
-  const {
-    data: activity,
-    isLoading: activityLoading,
-    isFetching: activityFetching,
-    error: activityError,
-    refetch,
-  } = useGetActivityByIdQuery(activityId ?? skipToken);
+  const staffEndpoints = useStaffSharedEndpoints();
+  const activityQuery = useGetActivityByIdQuery(activityId ?? skipToken);
+  const employeesQuery = staffEndpoints.getAllEmployees;
+  const [deleteActivity, deleteSubmitStatus] = useDeleteActivityMutation();
 
-  const {
-    data: employees,
-    error: employeeError,
-    isFetching: employeesFetching,
-    isLoading: employeesLoading,
-  } = getAllEmployees;
-
-  const [deleteActivity, { isLoading: isDeleting, isSuccess: isDeleteSuccess }] =
-    useDeleteActivityMutation();
+  const fetchError = (activityQuery.error || employeesQuery.error) as ResponseError;
 
   // Merge employee name properly
   const employeeFullName = useMemo(() => {
-    if (!activity || !employees) return null;
+    if (!activityQuery.data || !employeesQuery.data) return null;
 
-    if (activity.employeeId === null) return 'Sistem';
+    if (activityQuery.data.employeeId === null) return 'Sistem';
 
-    const employee = employees.items.find(e => e.id === activity.employeeId);
+    const employee = employeesQuery.data.items.find(e => e.id === activityQuery.data?.employeeId);
 
     return employee?.fullName ?? 'Bilinmiyor';
-  }, [activity, employees]);
-
-  // Combined flags
-  const isLoading = activityLoading || employeesLoading;
-  const isFetching = activityFetching || employeesFetching;
-  const endpointError = (activityError || employeeError) as ResponseError;
+  }, [activityQuery.data, employeesQuery.data]);
 
   // Show API Errors once
   useEffect(() => {
-    if (!endpointError) return;
-    setError(endpointError);
-    Toast.error(endpointError.title);
-  }, [endpointError]);
+    if (!fetchError) return;
+    setError(fetchError);
+    Toast.error(fetchError.title);
+  }, [fetchError]);
 
-  const handleDelete = async () => {
+  const deleteAction = async () => {
     try {
       await deleteActivity(activityId).unwrap();
     } catch (error) {
@@ -61,20 +44,31 @@ export function useActivityDetail(activityId: string) {
     }
   };
 
+  const refetchAction = async () => {
+    setError(undefined);
+
+    await Promise.all([activityQuery.refetch(), employeesQuery.refetch()]);
+  };
+
   return {
     // Data
-    activity,
-    employeeFullName,
 
-    // Flags
-    isLoading,
-    isFetching,
-    isDeleting,
-    isDeleteSuccess,
-    error,
-
-    // Actions
-    refetch,
-    handleDelete,
+    data: {
+      activitiy: activityQuery.data,
+      employeeFullName: employeeFullName,
+    },
+    state: {
+      activityState: activityQuery,
+      employeesState: employeesQuery,
+      deleteSubmitStatus: deleteSubmitStatus,
+    },
+    errors: {
+      error,
+      fetchError,
+    },
+    actions: {
+      delete: deleteAction,
+      refetch: refetchAction,
+    },
   };
 }
