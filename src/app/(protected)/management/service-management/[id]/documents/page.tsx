@@ -4,5 +4,5 @@ import { useServiceDetailCtx } from '@/modules/service-management/features/servi
 
 export default function Page() {
   const query = useServiceDetailCtx();
-  return <DocumentListPage serviceId={query.service?.id} />;
+  return <DocumentListPage serviceId={query.serviceDetailResponse?.data.service?.id} />;
 }

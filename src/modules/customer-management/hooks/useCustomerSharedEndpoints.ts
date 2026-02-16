@@ -12,7 +12,7 @@ export function useCustomerSharedEndpoints() {
   const getAllCustomer = useGetAllCustomersQuery();
   const getIndividualOptions = useGetIndividualOptionsQuery();
   const getCorporateOptions = useGetCorporateOptionsQuery();
-  const getByIdCustomerAddressList = (customerId: string) =>
+  const getByIdCustomerAddressList = (customerId?: string) =>
     useGetByIdCustomerAddressListQuery(customerId!, {
       skip: !customerId,
     });

@@ -8,47 +8,33 @@ import {
   Section,
   Skeleton,
 } from '@/modules/service-management/components/ui/detail';
-import { ServiceModel } from '@/modules/service-management/types/service.types';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import Link from 'next/link';
+import { ServiceDetailHookResponse } from '../../hooks/types/serviceHookReturn.types';
 
 interface ServiceDetailPageProps {
-  service?: ServiceModel;
-  customerName?: string;
-  assignedName?: string;
-  isLoading: boolean;
-  isFetching: boolean;
+  model: ServiceDetailHookResponse;
   router: AppRouterInstance;
-  error?: any;
-  onRetry?: () => void;
 }
 
-export default function ServiceDetailPage({
-  service,
-  customerName,
-  assignedName,
-  isLoading,
-  isFetching,
-  router,
-  error,
-  onRetry,
-}: ServiceDetailPageProps) {
-  if (isLoading || isFetching) {
+export default function ServiceDetailPage({ model, router }: ServiceDetailPageProps) {
+  const { data, actions, state, errors } = model;
+  if (state.serviceState.isLoading || state.serviceState.isFetching) {
     return <Skeleton />;
   }
 
-  if (!isLoading && !isFetching && error) {
+  if (!state.serviceState.isLoading && !state.serviceState.isFetching && errors.error) {
     return (
       <div className="mt-25 text-center text-sm text-red-500 dark:text-red-400">
-        {error.detail || 'Servis bilgileri yüklenemedi.'}
-        <button className="mb-25 ml-2 underline" onClick={onRetry}>
+        {errors.error.detail || 'Servis bilgileri yüklenemedi.'}
+        <button className="mb-25 ml-2 underline" onClick={actions.refetch}>
           Tekrar Dene
         </button>
       </div>
     );
   }
 
-  if (!service) {
+  if (!data.service) {
     return <div className="text-center text-gray-500 dark:text-gray-400">Servis bulunamadı.</div>;
   }
 
@@ -57,41 +43,47 @@ export default function ServiceDetailPage({
       {/* Genel */}
       <Section title="Genel Bilgiler">
         <Row>
-          <Field label="Servis Kodu" value={service.code} />
+          <Field label="Servis Kodu" value={data.service.code} />
           <Field
             label="Müşteri"
             value={
               <Link
-                children={customerName}
+                children={data.customerName}
                 href={`/management/customer-management/individual/${'d83bbe9c-ef70-4568-8110-528120f91fbd'}`}
               />
             }
           />
           <Field
             label="Müşteri Tipi"
-            value={service.customerType === 'Individual' ? 'Bireysel' : 'Kurumsal'}
+            value={data.service.customerType === 'Individual' ? 'Bireysel' : 'Kurumsal'}
           />
         </Row>
 
         <Row>
-          <Field label="Öncelik" value={<PriorityStatus priority={service.priority} size="md" />} />
-          <Field label="Durum" value={<ServiceStatus size="md" serviceStatus={service.status} />} />
+          <Field
+            label="Öncelik"
+            value={<PriorityStatus priority={data.service.priority} size="md" />}
+          />
+          <Field
+            label="Durum"
+            value={<ServiceStatus size="md" serviceStatus={data.service.status} />}
+          />
         </Row>
         <Row>
-          <Field label="Oluşturma Tarihi" value={formatDate(service.createdDate)} />
-          <Field label="Güncellenme Tarihi" value={formatDate(service.updatedDate)} />
+          <Field label="Oluşturma Tarihi" value={formatDate(data.service.createdDate)} />
+          <Field label="Güncellenme Tarihi" value={formatDate(data.service.updatedDate)} />
         </Row>
       </Section>
 
       {/* Service Prop */}
       <Section title="Servis Tanımları">
         <Row>
-          <Field label="Başlık" value={service.title} />
-          <Field label="Konu" value={service.subject} />
+          <Field label="Başlık" value={data.service.title} />
+          <Field label="Konu" value={data.service.subject} />
         </Row>
 
         <FullRow>
-          <Field label="Açıklama" value={service.description} />
+          <Field label="Açıklama" value={data.service.description} />
         </FullRow>
       </Section>
 
@@ -100,13 +92,15 @@ export default function ServiceDetailPage({
         <Row>
           <Field
             label="Atama Türü"
-            value={service.teamId ? 'Takım' : service.employeeId ? 'Personel' : 'Atanmamış'}
+            value={
+              data.service.teamId ? 'Takım' : data.service.employeeId ? 'Personel' : 'Atanmamış'
+            }
           />
 
-          {service.teamId ? (
-            <Field label="Takım Adı" value={assignedName || '-'} />
-          ) : service.employeeId ? (
-            <Field label="Personel Adı" value={assignedName || '-'} />
+          {data.service.teamId ? (
+            <Field label="Takım Adı" value={data.assignedName || '-'} />
+          ) : data.service.employeeId ? (
+            <Field label="Personel Adı" value={data.assignedName || '-'} />
           ) : null}
         </Row>
       </Section>
@@ -116,9 +110,9 @@ export default function ServiceDetailPage({
         <FullRow>
           <Field
             label="Adres"
-            value={`${service.address?.addressLine || ''}, ${service.address?.city || ''}, ${
-              service.address?.state || ''
-            }, ${service.address?.postalCode || ''}`}
+            value={`${data.service.address?.addressLine || ''}, ${data.service.address?.city || ''}, ${
+              data.service.address?.state || ''
+            }, ${data.service.address?.postalCode || ''}`}
           />
         </FullRow>
       </Section>

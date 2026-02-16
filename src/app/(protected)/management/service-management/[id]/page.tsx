@@ -3,29 +3,8 @@ import ServiceDetailPage from '@/modules/service-management/features/service/com
 import { useServiceDetailCtx } from '@/modules/service-management/features/service/context/ServiceDetailContext';
 
 const page = () => {
-  const {
-    service,
-    customerName,
-    assignedName,
-    isDeleting,
-    isFetching,
-    isLoading,
-    error,
-    refetch,
-    router,
-  } = useServiceDetailCtx();
-  return (
-    <ServiceDetailPage
-      isFetching={isFetching}
-      isLoading={isLoading}
-      error={error}
-      service={service}
-      customerName={customerName}
-      assignedName={assignedName}
-      router={router}
-      onRetry={refetch}
-    />
-  );
+  const ctx = useServiceDetailCtx();
+  return <ServiceDetailPage model={ctx.serviceDetailResponse} router={ctx.router} />;
 };
 
 export default page;

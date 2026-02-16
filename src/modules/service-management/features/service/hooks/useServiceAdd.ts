@@ -5,15 +5,18 @@ import { useAddServiceMutation } from '@/modules/service-management/endpoints/se
 import { ServiceAddModel } from '@/modules/service-management/types/service.types';
 import { useStaffSharedEndpoints } from '@/modules/staff-management/hooks/useStaffSharedEndpoints';
 import { useEffect, useState } from 'react';
+import { ServiceAddHookResponse } from './types/serviceHookReturn.types';
 
-export default function useServiceAdd() {
+export default function useServiceAdd(customerId?: string): ServiceAddHookResponse {
+  const [error, setError] = useState<ResponseError>();
   const customerEndpoints = useCustomerSharedEndpoints();
   const staffEndpoints = useStaffSharedEndpoints();
-  const corporate = customerEndpoints.getCorporateOptions;
-  const individual = customerEndpoints.getIndividualOptions;
+  const corporateQuery = customerEndpoints.getCorporateOptions;
+  const individualQuery = customerEndpoints.getIndividualOptions;
   const employeesQuery = staffEndpoints.getAllEmployees;
   const teamsQuery = staffEndpoints.getAllTeams;
-  const [formError, setFormError] = useState<ResponseError>();
+  const addressQuery = customerEndpoints.getByIdCustomerAddressList(customerId);
+
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ServiceAddModel, string>>>(
     {},
   );
@@ -21,7 +24,7 @@ export default function useServiceAdd() {
   const [addService, submitState] = useAddServiceMutation();
 
   const addServiceAction = async (payload: ServiceAddModel) => {
-    setFormError(undefined);
+    setError(undefined);
     setFieldErrors({});
 
     try {
@@ -29,7 +32,7 @@ export default function useServiceAdd() {
       Toast.success('Servis başarıyla eklendi!');
     } catch (err) {
       const error = err as ResponseError;
-      setFormError(error);
+      setError(error);
 
       if (Array.isArray(error.Errors)) {
         const mapped: Partial<Record<keyof ServiceAddModel, string>> = {};
@@ -48,7 +51,11 @@ export default function useServiceAdd() {
   };
 
   const fetchError =
-    corporate.error || individual.error || employeesQuery.error || teamsQuery.error;
+    corporateQuery.error ||
+    individualQuery.error ||
+    employeesQuery.error ||
+    teamsQuery.error ||
+    addressQuery.error;
 
   // Show API Errors once
   useEffect(() => {
@@ -57,39 +64,29 @@ export default function useServiceAdd() {
 
   return {
     data: {
-      corporateCustomers: corporate.data,
-      individualCustomers: individual.data,
+      corporateCustomers: corporateQuery.data,
+      individualCustomers: individualQuery.data,
       employees: employeesQuery.data,
       teams: teamsQuery.data,
-      getCustomerAddresses: (id: string) => customerEndpoints.getByIdCustomerAddressList(id),
+      customerAddress: addressQuery.data,
     },
 
     state: {
-      isLoadingOptions:
-        corporate.isLoading ||
-        individual.isLoading ||
-        employeesQuery.isLoading ||
-        teamsQuery.isLoading,
-
-      isFetchingOptions:
-        corporate.isFetching ||
-        individual.isFetching ||
-        employeesQuery.isFetching ||
-        teamsQuery.isFetching,
-
-      isSubmitting: submitState.isLoading,
-      isSubmitSuccess: submitState.isSuccess,
-      isSubmitError: submitState.isError,
+      addState: submitState,
+      customerState: corporateQuery || individualQuery,
+      teamsState: teamsQuery,
+      employeesState: employeesQuery,
+      addressState: addressQuery,
     },
 
     errors: {
-      formError,
-      fieldErrors,
+      error: error,
+      fieldErrors: fieldErrors,
       fetchError: fetchError as ResponseError | undefined,
     },
 
     actions: {
-      addService: addServiceAction,
+      add: payload => addServiceAction(payload),
     },
   };
 }

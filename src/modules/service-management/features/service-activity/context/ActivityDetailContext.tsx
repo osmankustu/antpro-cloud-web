@@ -12,7 +12,7 @@ export type ActivityDetailContextType = {
   isDeleteSuccess: boolean;
   error: ResponseError | undefined;
   refetch: () => void;
-  handleDelete: () => void;
+  handleDelete: () => Promise<void>;
   router: AppRouterInstance;
 };
 

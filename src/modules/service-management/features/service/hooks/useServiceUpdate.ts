@@ -5,16 +5,18 @@ import { useUpdateServiceMutation } from '@/modules/service-management/endpoints
 import { ServiceUpdateModel } from '@/modules/service-management/types/service.types';
 import { useStaffSharedEndpoints } from '@/modules/staff-management/hooks/useStaffSharedEndpoints';
 import { useEffect, useState } from 'react';
+import { ServiceUpdateHookResponse } from './types/serviceHookReturn.types';
 
-export default function useServiceUpdate() {
+export default function useServiceUpdate(customerId?: string): ServiceUpdateHookResponse {
   const customerEndpoints = useCustomerSharedEndpoints();
   const staffEndpoints = useStaffSharedEndpoints();
-  const corporate = customerEndpoints.getCorporateOptions;
-  const individual = customerEndpoints.getIndividualOptions;
+  const corporateQuery = customerEndpoints.getCorporateOptions;
+  const individualQuery = customerEndpoints.getIndividualOptions;
   const employeesQuery = staffEndpoints.getAllEmployees;
   const teamsQuery = staffEndpoints.getAllTeams;
+  const addressQuery = customerEndpoints.getByIdCustomerAddressList(customerId);
 
-  const [formError, setFormError] = useState<ResponseError>();
+  const [error, setError] = useState<ResponseError>();
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ServiceUpdateModel, string>>>(
     {},
   );
@@ -22,7 +24,7 @@ export default function useServiceUpdate() {
   const [updateService, submitState] = useUpdateServiceMutation();
 
   const updateServiceAction = async (payload: ServiceUpdateModel) => {
-    setFormError(undefined);
+    setError(undefined);
     setFieldErrors({});
 
     try {
@@ -30,7 +32,7 @@ export default function useServiceUpdate() {
       Toast.success('Servis başarıyla Güncellendi!');
     } catch (err) {
       const error = err as ResponseError;
-      setFormError(error);
+      setError(error);
 
       if (Array.isArray(error.Errors)) {
         const mapped: Partial<Record<keyof ServiceUpdateModel, string>> = {};
@@ -49,7 +51,11 @@ export default function useServiceUpdate() {
   };
 
   const fetchError =
-    corporate.error || individual.error || employeesQuery.error || teamsQuery.error;
+    corporateQuery.error ||
+    individualQuery.error ||
+    employeesQuery.error ||
+    teamsQuery.error ||
+    addressQuery.error;
 
   // Show API Errors once
   useEffect(() => {
@@ -58,36 +64,26 @@ export default function useServiceUpdate() {
 
   return {
     data: {
-      corporateCustomers: corporate.data,
-      individualCustomers: individual.data,
+      corporateCustomers: corporateQuery.data,
+      individualCustomers: individualQuery.data,
       employees: employeesQuery.data,
       teams: teamsQuery.data,
-      getCustomerAddresses: (id: string) => customerEndpoints.getByIdCustomerAddressList(id),
+      customerAddress: addressQuery.data,
     },
     state: {
-      isLoadingOptions:
-        corporate.isLoading ||
-        individual.isLoading ||
-        employeesQuery.isLoading ||
-        teamsQuery.isLoading,
-
-      isFetchingOptions:
-        corporate.isFetching ||
-        individual.isFetching ||
-        employeesQuery.isFetching ||
-        teamsQuery.isFetching,
-
-      isSubmitting: submitState.isLoading,
-      isSubmitSuccess: submitState.isSuccess,
-      isSubmitError: submitState.isError,
+      updateState: submitState,
+      customerState: individualQuery || corporateQuery,
+      employeesState: employeesQuery,
+      teamsState: teamsQuery,
+      addressState: addressQuery,
     },
     errors: {
-      formError,
-      fieldErrors,
+      error: error,
+      fieldErrors: fieldErrors,
       fetchError: fetchError as ResponseError | undefined,
     },
     actions: {
-      updateService: updateServiceAction,
+      update: payload => updateServiceAction(payload),
     },
   };
 }

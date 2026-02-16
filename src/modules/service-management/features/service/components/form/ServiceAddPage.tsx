@@ -1,37 +1,31 @@
+'use client';
 import Input from '@/components/form/input/InputField';
 import TextArea from '@/components/form/input/TextArea';
-import { UpdateModalButton } from '@/components/ui/button/UpdateModalButton';
-import { useModal } from '@/hooks/useModal';
+import Button from '@/components/ui/button/Button';
 import { BaseAddress } from '@/modules/customer-management/types/base/baseAddress';
+import { AddressAddModal } from '@/modules/service-management/components/modals/AddressAddModal';
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { ServiceMessages } from '../../constants/serviceMessages';
-import useServiceUpdate from '../../features/service/hooks/useServiceUpdate';
-import { ServiceModel, ServiceUpdateModel } from '../../types/service.types';
-import { AddressSelect } from '../forms/AddressSelect';
-import { AssignmentSelect } from '../forms/AssignmentsSelect';
-import { CustomerSelect } from '../forms/CustomerSelect';
-import FormField from '../forms/FormField';
-import FormGrid from '../forms/FormGrid';
-import FormSection from '../forms/FormSection';
-import { PrioritySelect } from '../forms/PrioritySelect';
-import { AddressAddModal } from '../modals/AddressAddModal';
+import { AddressSelect } from '../../../../components/forms/AddressSelect';
+import { AssignmentSelect } from '../../../../components/forms/AssignmentsSelect';
+import { CustomerSelect } from '../../../../components/forms/CustomerSelect';
+import FormField from '../../../../components/forms/FormField';
+import FormGrid from '../../../../components/forms/FormGrid';
+import FormSection from '../../../../components/forms/FormSection';
+import { PrioritySelect } from '../../../../components/forms/PrioritySelect';
+import { ServiceAddModel } from '../../../../types/service.types';
+import useServiceAdd from '../../hooks/useServiceAdd';
 
-interface ServiceUpdatePageProps {
-  service?: ServiceModel;
-}
-
-export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
-  const { isOpen, closeModal, openModal } = useModal();
-  const { data, state, errors, actions } = useServiceUpdate();
-  const { control, reset, setValue, getValues, handleSubmit } = useForm<ServiceUpdateModel>({
+export default function ServiceAddPage() {
+  const router = useRouter();
+  const { control, reset, handleSubmit, setValue } = useForm<ServiceAddModel>({
     defaultValues: {
       customerId: '',
       title: '',
       subject: '',
       priority: '',
       customerType: '',
-      addressType: 'regist',
       assignmentType: '',
       description: '',
       address: {
@@ -48,42 +42,20 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
     },
   });
 
-  useEffect(() => {
-    if (service) {
-      reset({
-        id: service.id ?? '',
-        code: service.code ?? '',
-        customerId: service.customerId ?? '',
-        title: service.title ?? '',
-        subject: service.subject ?? '',
-        priority: service.priority ?? '',
-        customerType: service.customerType ?? '',
-        description: service.description ?? '',
-        address: {
-          addressId: service.address.addressId ?? '',
-          addressLine: service.address.addressLine ?? '',
-          city: service.address.city ?? '',
-          latitude: service.address.latitude ?? '',
-          longitude: service.address.longitude ?? '',
-          postalCode: service.address.postalCode ?? '',
-          state: service.address.state ?? '',
-          stateId: service.address.stateId ?? '',
-        },
-        employeeId: service.employeeId ?? '',
-        teamId: service.teamId ?? '',
-        createdDate: service.createdDate ?? '',
-      });
-    }
-  }, [service]);
-
   const customerId = useWatch({
     control,
     name: 'customerId',
     defaultValue: '',
   });
 
-  const handleServiceSubmit = (data: ServiceUpdateModel) => {
-    actions.updateService(data);
+  const { data, state, actions, errors } = useServiceAdd(customerId);
+
+  useEffect(() => {
+    if (state.addState.isSuccess) router.push('/management/service-management');
+  }, [state.addState.isSuccess]);
+
+  const handleServiceSubmit = (data: ServiceAddModel) => {
+    actions.add(data);
   };
   return (
     <div className="space-y-6">
@@ -91,8 +63,6 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
         <CustomerSelect
           corporateCustomers={data.corporateCustomers?.items}
           individualCustomers={data.individualCustomers?.items}
-          defaultType={getValues('customerType')}
-          defaultValueId={getValues('customerId')}
           error={!!errors.fieldErrors.customerId}
           hint={errors.fieldErrors.customerId}
           onChange={(value, type) => {
@@ -161,7 +131,6 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
                 <PrioritySelect
                   onChange={value => field.onChange(value)}
                   error={!!errors.fieldErrors.priority}
-                  value={getValues('priority')}
                 />
               )}
             />
@@ -176,10 +145,9 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
               name="title"
               render={({ field }) => (
                 <AddressSelect
-                  defaultAddressId={getValues('address.addressId')!}
                   disabled={!customerId}
-                  addresses={data.getCustomerAddresses(customerId).data?.items}
-                  onClick={openModal}
+                  addresses={data.customerAddress?.items}
+                  rightElement={<AddressAddModal disabled={!customerId} customerId={customerId} />}
                   onChange={selected => {
                     const address: BaseAddress = selected!;
                     setValue('address.addressId', address?.id);
@@ -203,8 +171,6 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
         <FormGrid>
           <FormField label="Atama Tipi">
             <AssignmentSelect
-              defaultId={service?.employeeId ? service.employeeId : service?.teamId}
-              defaultType={service?.employeeId ? 'personel' : service?.teamId ? 'team' : 'none'}
               personnelList={data.employees?.items}
               teamList={data.teams?.items}
               onChange={(value, type) => {
@@ -221,6 +187,7 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
                   setValue('teamId', '');
                 }
               }}
+              defaultType="none"
             />
           </FormField>
         </FormGrid>
@@ -228,14 +195,14 @@ export default function ServiceUpdatePage({ service }: ServiceUpdatePageProps) {
 
       {/* Kaydet Butonu */}
       <div className="flex justify-end">
-        <UpdateModalButton
-          message={ServiceMessages.updateService}
-          onConfirm={handleSubmit(handleServiceSubmit)}
-          onSubmitting={state.isSubmitting}
-          onSuccess={state.isSubmitSuccess}
+        <Button
+          size="sm"
+          onClick={handleSubmit(handleServiceSubmit)}
+          isSubmitting={state.addState.isLoading}
+          disabled={state.addState.isLoading}
+          children={'Kaydet'}
         />
       </div>
-      <AddressAddModal isOpen={isOpen} onClose={closeModal} customerId={customerId} />
     </div>
   );
 }

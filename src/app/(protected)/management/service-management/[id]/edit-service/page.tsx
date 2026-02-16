@@ -1,9 +1,9 @@
 'use client';
-import ServiceUpdatePage from '@/modules/service-management/components/pages/ServiceUpdatePage';
+import ServiceUpdatePage from '@/modules/service-management/features/service/components/form/ServiceUpdatePage';
 import { useServiceDetailCtx } from '@/modules/service-management/features/service/context/ServiceDetailContext';
 
 export default function Page() {
-  const query = useServiceDetailCtx();
+  const ctx = useServiceDetailCtx();
 
-  return <ServiceUpdatePage service={query.service} />;
+  return <ServiceUpdatePage model={ctx.serviceDetailResponse} router={ctx.router} />;
 }

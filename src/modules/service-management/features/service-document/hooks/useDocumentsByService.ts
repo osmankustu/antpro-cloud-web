@@ -10,73 +10,60 @@ import { useEffect, useMemo, useState } from 'react';
 
 export function useDocumentsByService(serviceId?: string) {
   const [error, setError] = useState<ResponseError | undefined>(undefined);
-  // 1) Dökümanları çek
-  const {
-    data: documents,
-    isLoading: documentsLoading,
-    isFetching: documentFetching,
-    error: documentsError,
-    refetch,
-  } = useGetDocumentByServiceIdQuery(serviceId ? serviceId : skipToken);
+  const documentQuery = useGetDocumentByServiceIdQuery(serviceId ? serviceId : skipToken);
+  const urls = documentQuery.data?.items?.map(d => d.filePath) ?? [];
+  const signedQuery = useGetDocumentsSignedUrlQuery(
+    { urls, duration: 60 },
+    { skip: urls.length === 0 }, // boşsa çağırma
+  );
+  const [deleteDocument, deleteSubmitState] = useDeleteDocumentMutation();
 
-  const [deleteDocument, { isLoading: isDeleting }] = useDeleteDocumentMutation();
+  const fetchError = (documentQuery.error || signedQuery.error) as ResponseError;
+  useEffect(() => {
+    if (!fetchError) return;
+    setError(fetchError);
+    Toast.error(fetchError.title);
+  }, [fetchError]);
 
-  const handleDelete = async (id: string) => {
+  const documents = useMemo(() => {
+    if (!documentQuery.data?.items || !signedQuery.data?.signedUrls) return [];
+
+    return documentQuery.data.items.map(doc => ({
+      ...doc,
+      filePath: signedQuery.data?.signedUrls[doc.filePath]!,
+    }));
+  }, [documentQuery.data, signedQuery.data]);
+
+  const deleteAction = async (id: string) => {
     try {
       await deleteDocument(id).unwrap();
-      refetch();
     } catch (error) {
       const err = error as ResponseError;
       Toast.error(err.title || 'Döküman Silindi');
     }
   };
 
-  // Signed URL oluşturulacak yollar
-  const urls = documents?.items?.map(d => d.filePath) ?? [];
-
-  // 2) Signed URL’leri çek
-  const {
-    data: signedResults,
-    error: signedError,
-    isFetching: signedFetching,
-    isLoading: signedLoading,
-  } = useGetDocumentsSignedUrlQuery(
-    { urls, duration: 60 },
-    { skip: urls.length === 0 }, // boşsa çağırma
-  );
-
-  const endpointError = (documentsError || signedError) as ResponseError;
-  const isLoading = documentsLoading || signedLoading;
-  const isFetching = documentFetching || signedFetching;
-
-  // 3) Hata yönetimi
-  // Show API Errors once
-  useEffect(() => {
-    if (!endpointError) return;
-    setError(endpointError);
-    Toast.error(endpointError.title);
-  }, [endpointError]);
-
-  // 4) Dökümanları signed URL ile merge et
-  const finalDocuments = useMemo(() => {
-    if (!documents?.items || !signedResults?.signedUrls) return [];
-
-    return documents.items.map(doc => ({
-      ...doc,
-      filePath: signedResults.signedUrls[doc.filePath],
-    }));
-  }, [documents, signedResults]);
+  const refetchAction = async () => {
+    setError(undefined);
+    await Promise.all([documentQuery.refetch(), signedQuery.refetch()]);
+  };
 
   return {
-    // data
-    documents: finalDocuments,
-    // states
-    isLoading,
-    isFetching,
-    isDeleting,
-    error,
-    // actions
-    refetch,
-    handleDelete,
+    data: {
+      documents: documents,
+    },
+    state: {
+      documentState: documentQuery,
+      signedState: signedQuery,
+      deleteSubmitState: deleteSubmitState,
+    },
+    errors: {
+      error,
+      fetchError,
+    },
+    actions: {
+      refetch: refetchAction,
+      delete: deleteAction,
+    },
   };
 }

@@ -7,8 +7,9 @@ import {
 } from '@/modules/service-management/endpoints/service.endpoints';
 import { useStaffSharedEndpoints } from '@/modules/staff-management/hooks/useStaffSharedEndpoints';
 import { useEffect, useState } from 'react';
+import { ServiceDetailHookResponse } from './types/serviceHookReturn.types';
 
-export function useServiceDetail(id: string) {
+export function useServiceDetail(id: string): ServiceDetailHookResponse {
   const [error, setError] = useState<ResponseError | undefined>(undefined);
 
   const staffEndpoints = useStaffSharedEndpoints();

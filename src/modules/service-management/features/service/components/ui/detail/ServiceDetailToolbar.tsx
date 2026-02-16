@@ -3,33 +3,20 @@
 import { DeleteModal } from '@/components/ui/button/DeleteModalButton';
 import ServiceStatus from '@/components/ui/indicators/ServiceStatus';
 import { ServiceMessages } from '@/modules/service-management/constants/serviceMessages';
-import { ServiceModel } from '@/modules/service-management/types/service.types';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { usePathname } from 'next/navigation';
 import ToolbarButton from '../../../../../../../components/ui/button/ToolbarButton';
+import { ServiceDetailHookResponse } from '../../../hooks/types/serviceHookReturn.types';
 
 interface ServiceDetailToolbarProps {
-  service?: ServiceModel;
-  customerName?: string;
-  isLoading: boolean;
-  isFetching: boolean;
+  model: ServiceDetailHookResponse;
   router: AppRouterInstance;
-  error?: any;
-  onRetry?: () => void;
-  onDelete: () => void;
 }
 
-export function ServiceDetailToolbar({
-  service,
-  customerName,
-  isLoading,
-  isFetching,
-  router,
-  error,
-  onRetry,
-  onDelete,
-}: ServiceDetailToolbarProps) {
+export function ServiceDetailToolbar({ model, router }: ServiceDetailToolbarProps) {
   const pathname = usePathname();
+
+  const { actions, data, errors, state } = model;
 
   const isActivities = pathname.includes('/activities');
   const isDocuments = pathname.includes('/documents');
@@ -41,18 +28,18 @@ export function ServiceDetailToolbar({
         {/* Left */}
         <div>
           <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            {service?.code || 'Servis'} Detayları
+            {data.service?.code || 'Servis'} Detayları
           </h4>
 
-          {isLoading || isFetching ? (
+          {state.serviceState.isLoading || state.serviceState.isFetching ? (
             <p className="text-sm text-gray-400">Yükleniyor...</p>
-          ) : error ? (
-            <button className="text-sm text-red-500 underline" onClick={onRetry}>
+          ) : errors.error ? (
+            <button className="text-sm text-red-500 underline" onClick={actions.refetch}>
               Yükleme hatası – tekrar dene
             </button>
           ) : (
             <p className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              {customerName} • <ServiceStatus size="sm" serviceStatus={service?.status} />
+              {data.customerName} • <ServiceStatus size="sm" serviceStatus={data.service?.status} />
             </p>
           )}
         </div>
@@ -62,7 +49,7 @@ export function ServiceDetailToolbar({
           <div className="flex min-w-max gap-2">
             <ToolbarButton
               active={!isActivities && !isDocuments && !isEdit}
-              onClick={() => router.push(`/management/service-management/${service?.id}`)}
+              onClick={() => router.push(`/management/service-management/${data.service?.id}`)}
             >
               Genel Bilgiler
             </ToolbarButton>
@@ -70,7 +57,7 @@ export function ServiceDetailToolbar({
             <ToolbarButton
               active={isActivities}
               onClick={() =>
-                router.push(`/management/service-management/${service?.id}/activities`)
+                router.push(`/management/service-management/${data.service?.id}/activities`)
               }
             >
               Servis Hareketleri
@@ -78,7 +65,9 @@ export function ServiceDetailToolbar({
 
             <ToolbarButton
               active={isDocuments}
-              onClick={() => router.push(`/management/service-management/${service?.id}/documents`)}
+              onClick={() =>
+                router.push(`/management/service-management/${data.service?.id}/documents`)
+              }
             >
               Dökümanlar
             </ToolbarButton>
@@ -86,7 +75,7 @@ export function ServiceDetailToolbar({
             <ToolbarButton
               active={isEdit}
               onClick={() =>
-                router.push(`/management/service-management/${service?.id}/edit-service`)
+                router.push(`/management/service-management/${data.service?.id}/edit-service`)
               }
             >
               Düzenle
@@ -96,7 +85,12 @@ export function ServiceDetailToolbar({
             <ToolbarButton active={false} onClick={() => console.log('QR Oluştur')}>
               QR
             </ToolbarButton>
-            <DeleteModal onConfirm={onDelete} message={ServiceMessages.deleteService} />
+            <DeleteModal
+              onConfirm={() => actions.delete()}
+              message={ServiceMessages.deleteService}
+              onDeleting={state.deleteState.isLoading}
+              onSuccess={state.deleteState.isSuccess}
+            />
             <ToolbarButton active={false} onClick={() => console.log('Yazdır')}>
               Yazdır
             </ToolbarButton>

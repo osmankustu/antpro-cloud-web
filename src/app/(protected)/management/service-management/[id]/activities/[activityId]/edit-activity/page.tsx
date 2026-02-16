@@ -6,6 +6,11 @@ import { useServiceDetailCtx } from '@/modules/service-management/features/servi
 
 export default function Page() {
   const query = useActivityDetailCtx();
-  const serviceQuery = useServiceDetailCtx();
-  return <ActivityUpdatePage activity={query.activity} service={serviceQuery.service} />;
+  const serviceCtx = useServiceDetailCtx();
+  return (
+    <ActivityUpdatePage
+      activity={query.activity}
+      service={serviceCtx.serviceDetailResponse.data.service}
+    />
+  );
 }

@@ -4,5 +4,5 @@ import { useServiceDetailCtx } from '@/modules/service-management/features/servi
 
 export default function Page() {
   const query = useServiceDetailCtx();
-  return <ActivityListPage service={query.service} />;
+  return <ActivityListPage service={query.serviceDetailResponse?.data.service} />;
 }

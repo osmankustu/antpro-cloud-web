@@ -1,6 +1,6 @@
 'use client';
 import PageBreadcrumb from '@/components/common/PageBreadCrumb';
-import ServiceAddPage from '@/modules/service-management/components/pages/ServiceAddPage';
+import ServiceAddPage from '@/modules/service-management/features/service/components/form/ServiceAddPage';
 
 const page = () => {
   return (

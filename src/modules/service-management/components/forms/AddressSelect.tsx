@@ -1,6 +1,6 @@
 import Button from '@/components/ui/button/Button';
 import { BaseAddress } from '@/modules/customer-management/types/base/baseAddress';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import Select from 'react-select';
 
 import { useEffect } from 'react';
@@ -9,16 +9,16 @@ interface AddressSelectProps {
   addresses?: BaseAddress[];
   onChange?: (address: BaseAddress | null) => void;
   disabled?: boolean;
-  onClick: () => void;
   defaultAddressId?: string;
+  rightElement?: ReactNode;
 }
 
 export function AddressSelect({
   addresses = [],
   onChange,
   disabled,
-  onClick,
   defaultAddressId,
+  rightElement,
 }: AddressSelectProps) {
   const [selectedAddress, setSelectedAddress] = useState<BaseAddress | null>(null);
 
@@ -48,9 +48,9 @@ export function AddressSelect({
         />
       </div>
 
-      <Button disabled={disabled} size="sm" onClick={onClick}>
-        Adres Ekle
-      </Button>
+      {rightElement ?? rightElement}
+
+      
     </div>
   );
 }

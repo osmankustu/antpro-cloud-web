@@ -118,7 +118,6 @@ export function ServiceTable({ router }: ServiceTableProps) {
                     <TableCell className="sm:text-theme-sm py-2 text-xs sm:py-3">
                       <RowActions
                         onDetail={() => router.push(`service-management/${service.id}`)}
-                        onDelete={() => {}}
                         onEdit={() => router.push(`service-management/${service.id}/edit-service`)}
                       />
                     </TableCell>
@@ -132,8 +131,8 @@ export function ServiceTable({ router }: ServiceTableProps) {
       <div className="mt-5 hidden justify-items-center md:block">
         <Pagination
           {...{
-            currentPage: data.pagination.currentPage! + 1,
-            totalPages: data.pagination.pageCount!,
+            currentPage: data.pagination?.currentPage! + 1,
+            totalPages: data.pagination?.pageCount!,
             onPageChange: value => actions.goToPage(value - 1),
           }}
         />

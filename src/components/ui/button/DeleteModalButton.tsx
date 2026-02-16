@@ -6,13 +6,20 @@ import { Modal } from '../modal';
 import ToolbarButton from './ToolbarButton';
 
 interface DeleteModalProps {
-  message: Message;
-  onConfirm: () => void;
+  message?: Message;
+  onConfirm?: () => Promise<void> | undefined;
   onDeleting?: boolean;
   onSuccess?: boolean;
+  onDropdownItem?: boolean;
 }
 
-export function DeleteModal({ message, onConfirm, onDeleting, onSuccess }: DeleteModalProps) {
+export function DeleteModal({
+  message,
+  onConfirm,
+  onDeleting,
+  onSuccess,
+  onDropdownItem,
+}: DeleteModalProps) {
   const { openModal, isOpen, closeModal } = useModal();
 
   useEffect(() => {
@@ -21,7 +28,18 @@ export function DeleteModal({ message, onConfirm, onDeleting, onSuccess }: Delet
 
   return (
     <>
-      <ToolbarButton active={false} onClick={openModal} children={'Sil'} />
+      {onDropdownItem ? (
+        <button
+          onClick={() => {
+            openModal();
+          }}
+          className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30"
+        >
+          Sil
+        </button>
+      ) : (
+        <ToolbarButton active={false} onClick={openModal} children={'Sil'} />
+      )}
 
       <Modal isOpen={isOpen} onClose={closeModal} showCloseButton className="m-4 max-w-[520px]">
         <div className="relative w-full rounded-3xl bg-white p-6 sm:p-8 dark:bg-gray-900">
@@ -32,12 +50,12 @@ export function DeleteModal({ message, onConfirm, onDeleting, onSuccess }: Delet
 
           {/* TITLE */}
           <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
-            {message.title ?? 'Silmek istediğinize emin misiniz?'}
+            {message?.title ?? 'Silmek istediğinize emin misiniz?'}
           </h3>
 
           {/* DESCRIPTION */}
           <p className="mb-6 text-sm text-gray-600 dark:text-gray-300">
-            {message.description ??
+            {message?.description ??
               'Bu işlem geri alınamaz. Silinen veri kalıcı olarak kaldırılacaktır.'}
           </p>
 

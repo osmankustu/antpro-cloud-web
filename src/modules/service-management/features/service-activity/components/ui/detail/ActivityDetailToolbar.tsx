@@ -17,7 +17,7 @@ interface DetailToolbarProps {
   router: AppRouterInstance;
   error?: any;
   onRetry?: () => void;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
 }
 
 export function ActivityDetailToolbar({

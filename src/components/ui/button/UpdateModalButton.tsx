@@ -10,6 +10,7 @@ interface DeleteModalProps {
   onConfirm: () => void;
   onSuccess?: boolean;
   onSubmitting?: boolean;
+  onError?: boolean;
 }
 
 export function UpdateModalButton({
@@ -17,6 +18,7 @@ export function UpdateModalButton({
   onConfirm,
   onSubmitting,
   onSuccess,
+  onError,
 }: DeleteModalProps) {
   const { openModal, isOpen, closeModal } = useModal();
 
@@ -46,6 +48,13 @@ export function UpdateModalButton({
               'Bu işlem geri alınamaz. Silinen veri kalıcı olarak kaldırılacaktır.'}
           </p>
 
+          {/* Error */}
+          {onError ? (
+            <p className="mb-6 text-sm text-red-600 dark:text-red-300">
+              Veri kaydedilirken bir hata oluştu. lütfen formu kontrol edip tekrar deneyiniz...
+            </p>
+          ) : null}
+
           {/* ACTIONS */}
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
@@ -54,14 +63,23 @@ export function UpdateModalButton({
             >
               Vazgeç
             </button>
-
-            <button
-              onClick={onConfirm}
-              disabled={onSubmitting}
-              className="inline-flex items-center justify-center rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
-            >
-              {onSubmitting ? 'Kaydediliyor...' : 'Evet, Kaydet'}
-            </button>
+            {!onError ? (
+              <button
+                onClick={onConfirm}
+                disabled={onSubmitting}
+                className="inline-flex items-center justify-center rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
+              >
+                {onSubmitting ? 'Kaydediliyor...' : 'Evet, Kaydet'}
+              </button>
+            ) : (
+              <button
+                onClick={onConfirm}
+                disabled={onSubmitting}
+                className="inline-flex items-center justify-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
+              >
+                {onSubmitting ? 'Kaydediliyor' : 'Evet, Tekrar Dene'}
+              </button>
+            )}
           </div>
         </div>
       </Modal>

@@ -32,12 +32,7 @@ export function ActivityDetailPage({
   error,
   onRetry,
 }: ActivityDetailPageProps) {
-  const {
-    documents,
-    error: documentError,
-    isLoading: documentLoading,
-    isFetching: documnetFetching,
-  } = useDocumentsByActivity(activity?.id);
+  const { data, state, errors, actions } = useDocumentsByActivity(activity?.id);
 
   if (isLoading || isFetching) {
     return <Skeleton />;
@@ -89,13 +84,13 @@ export function ActivityDetailPage({
       <div className="mt-5">
         <Section title="Eklenen Dökümanlar">
           <DocumentTable
-            documents={documents}
-            error={documentError}
-            isFetching={documnetFetching}
-            isLoading={documentLoading}
-            onDelete={() => {}}
+            documents={data.documents}
+            error={errors.error}
+            isFetching={state.documentState.isFetching || state.signedState.isFetching}
+            isLoading={state.documentState.isLoading || state.signedState.isLoading}
+            onDelete={doc => actions.delete(doc.id)}
             onDownload={() => {}}
-            onRetry={() => {}}
+            onRetry={() => actions.refetch()}
             onView={() => {}}
           />
         </Section>

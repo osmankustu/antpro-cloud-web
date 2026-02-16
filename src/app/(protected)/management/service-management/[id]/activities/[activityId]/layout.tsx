@@ -12,13 +12,13 @@ export default function ActivityDetailLayout({ children }: { children: React.Rea
 
   function ToolbarBridge() {
     const query = useActivityDetailCtx();
-    const serviceQuery = useServiceDetailCtx();
+    const serviceCtx = useServiceDetailCtx();
     return (
       <ActivityDetailToolbar
         title="Hareket Detayları"
         router={query.router}
         activity={query.activity}
-        service={serviceQuery.service}
+        service={serviceCtx.serviceDetailResponse.data.service}
         isLoading={query.isLoading}
         isFetching={query.isFetching}
         isDeleting={query.isDeleting}

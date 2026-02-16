@@ -6,19 +6,20 @@ interface DocumentListPageProps {
 }
 
 export function DocumentListPage({ serviceId }: DocumentListPageProps) {
-  const { documents, error, handleDelete, isDeleting, isFetching, isLoading, refetch } =
-    useDocumentsByService(serviceId);
+  const { data, state, errors, actions } = useDocumentsByService(serviceId);
 
   return (
     <DocumentTable
-      documents={documents}
-      error={error}
-      isFetching={isFetching}
-      isLoading={isLoading}
-      onDelete={() => {}}
+      documents={data.documents}
+      error={errors.error}
+      isFetching={state.documentState.isFetching || state.signedState.isFetching}
+      isLoading={state.documentState.isLoading || state.signedState.isLoading}
+      onDelete={doc => actions.delete(doc.id)}
       onDownload={() => {}}
-      onRetry={() => {}}
+      onRetry={() => actions.refetch()}
       onView={() => {}}
+      onDeleting={state.deleteSubmitState.isLoading}
+      onSuccess={state.deleteSubmitState.isSuccess}
     />
   );
 }

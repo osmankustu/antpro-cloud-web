@@ -11,10 +11,14 @@ import {
   useGetServicesByDynamicQuery,
   useGetServicesQuery,
 } from '../../../endpoints/service.endpoints';
+import { ServicesHookResponse } from './types/serviceHookReturn.types';
 
 type ListMode = 'infinite' | 'pagination';
 
-export function useServices(pageSize: number = 2, mode: ListMode = 'pagination') {
+export function useServices(
+  pageSize: number = 2,
+  mode: ListMode = 'pagination',
+): ServicesHookResponse {
   const [error, setError] = useState<ResponseError | undefined>(undefined);
 
   const dispatch = useAppDispatch();

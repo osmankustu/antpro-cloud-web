@@ -116,7 +116,6 @@ export function ActivityTable({
                   <RowActions
                     onDetail={() => router.push(`activities/${activity.id}`)}
                     onEdit={() => router.push(`activities/${activity.id}/edit-activity`)}
-                    onDelete={() => {}}
                   />
                 </TableCell>
               </TableRow>

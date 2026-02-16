@@ -13,7 +13,9 @@ interface DocumentTableProps {
   onRetry: () => void;
   onView: (doc: DocumentModel) => void;
   onDownload: (doc: DocumentModel) => void;
-  onDelete: (doc: DocumentModel) => void;
+  onDelete: (doc: DocumentModel) => Promise<void>;
+  onDeleting?: boolean;
+  onSuccess?: boolean;
 }
 
 export function DocumentTable({
@@ -25,6 +27,8 @@ export function DocumentTable({
   onView,
   onDownload,
   onDelete,
+  onDeleting,
+  onSuccess,
 }: DocumentTableProps) {
   const showSpinner = isLoading || isFetching;
   const showEmpty = !isLoading && !isFetching && !error && documents?.length === 0;
@@ -98,7 +102,7 @@ export function DocumentTable({
 
                 {/* Ön izleme */}
                 <TableCell>
-                  {isImage(doc.fileType) ? (
+                  {doc.filePath && isImage(doc.fileType) ? (
                     <Image
                       src={doc.filePath}
                       width={100}
@@ -122,8 +126,10 @@ export function DocumentTable({
                 <TableCell className="sm:text-theme-sm z-10 py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
                   <RowActions
                     onView={() => onView(doc)}
-                    onDelete={() => {}}
-                    onDownload={() => {}}
+                    onDelete={() => onDelete(doc)}
+                    onDownload={() => onDownload(doc)}
+                    onDeleting={onDeleting}
+                    onSuccess={onSuccess}
                   />
                 </TableCell>
               </TableRow>

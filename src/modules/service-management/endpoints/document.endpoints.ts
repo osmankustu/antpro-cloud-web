@@ -23,6 +23,7 @@ const documentEndpoints = serviceManagementApi.injectEndpoints({
         url: `serviceDocuments/get-list/by-service-id/${id}`,
         method: 'GET',
       }),
+      providesTags: ['service-document'],
     }),
 
     getDocumentByActivityId: builder.query<Listed<DocumentModel>, string>({
@@ -30,6 +31,7 @@ const documentEndpoints = serviceManagementApi.injectEndpoints({
         url: `serviceDocuments/get-list/by-activity-id/${id}`,
         method: 'GET',
       }),
+      providesTags: ['service-document'],
     }),
 
     getDocumentById: builder.query<DocumentModel, string>({
@@ -44,7 +46,7 @@ const documentEndpoints = serviceManagementApi.injectEndpoints({
         url: `serviceDocuments/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['service-document', 'service-activity', 'service'],
+      invalidatesTags: ['service-document', 'service-activity'],
     }),
 
     addDocument: builder.mutation<DocumentModel, DocumentAddModel>({

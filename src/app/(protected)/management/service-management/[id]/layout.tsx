@@ -12,19 +12,8 @@ export default function ServiceDetailLayout({ children }: { children: ReactNode 
   const id = params.id as string;
 
   function ToolbarBridge() {
-    const query = useServiceDetailCtx();
-    return (
-      <ServiceDetailToolbar
-        service={query.service}
-        customerName={query.customerName}
-        isLoading={query.isLoading}
-        isFetching={query.isFetching}
-        error={query.error}
-        onRetry={query.refetch}
-        onDelete={query.handleDelete}
-        router={query.router}
-      />
-    );
+    const ctx = useServiceDetailCtx();
+    return <ServiceDetailToolbar model={ctx.serviceDetailResponse} router={ctx.router} />;
   }
 
   return (
