@@ -25,7 +25,7 @@ interface ServiceUpdatePageProps {
 
 export default function ServiceUpdatePage({ model, router }: ServiceUpdatePageProps) {
   const service = model.data.service;
-  const { data, state, errors, actions } = useServiceUpdate(service?.customerId);
+
   const { control, reset, setValue, getValues, handleSubmit } = useForm<ServiceUpdateModel>({
     defaultValues: {
       customerId: '',
@@ -83,6 +83,8 @@ export default function ServiceUpdatePage({ model, router }: ServiceUpdatePagePr
     name: 'customerId',
     defaultValue: '',
   });
+
+  const { data, state, errors, actions } = useServiceUpdate(customerId);
 
   const handleServiceSubmit = (data: ServiceUpdateModel) => {
     actions.update(data);
