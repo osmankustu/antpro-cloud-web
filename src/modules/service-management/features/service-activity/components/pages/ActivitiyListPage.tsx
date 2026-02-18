@@ -1,39 +1,27 @@
-import { ServiceModel } from '@/modules/service-management/types/service.types';
-import { useRouter } from 'next/navigation';
+'use client';
+
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import { ServiceDetailHookResponse } from '../../../service/hooks/types/serviceHookReturn.types';
 import { useActivities } from '../../hooks/useActivities';
 import { ActivityMobileList } from '../ui/ActivityMobileList';
 import { ActivityTable } from '../ui/ActivityTable';
 import { ActivityToolbar } from '../ui/ActivityToolbar';
 
 interface ActivityListPageProps {
-  service?: ServiceModel;
+  model: ServiceDetailHookResponse;
+  router: AppRouterInstance;
 }
 
-export default function ActivityListPage({ service }: ActivityListPageProps) {
-  const router = useRouter();
-  const { data, actions, state, errors } = useActivities(service?.poolId!);
+export default function ActivityListPage({ model, router }: ActivityListPageProps) {
+  const activitiesModel = useActivities(model.data.service?.poolId);
 
   return (
     <>
-      <ActivityToolbar router={router} service={service} />
+      <ActivityToolbar model={model} router={router} />
 
-      <ActivityMobileList
-        activities={data.activities}
-        isFetching={state.activitiesState.isFetching}
-        isLoading={state.activitiesState.isLoading}
-        onRetry={actions.refetch}
-        error={errors.error}
-        router={router}
-      />
+      <ActivityMobileList model={activitiesModel} router={router} />
 
-      <ActivityTable
-        activities={data.activities}
-        isFetching={state.activitiesState.isFetching}
-        isLoading={state.activitiesState.isLoading}
-        onRetry={actions.refetch}
-        error={errors.error}
-        router={router}
-      />
+      <ActivityTable model={activitiesModel} router={router} />
     </>
   );
 }

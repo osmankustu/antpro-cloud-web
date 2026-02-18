@@ -4,24 +4,26 @@ import {
   useDeleteActivityMutation,
   useGetActivitiesByPoolIdQuery,
 } from '@/modules/service-management/endpoints/activity.endpoints';
+import { ActivityModel } from '@/modules/service-management/types/activity.types';
 import { useStaffSharedEndpoints } from '@/modules/staff-management/hooks/useStaffSharedEndpoints';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { useEffect, useState } from 'react';
+import { ActivitiesHookResponse } from './types/activityHookReturn.types';
 
-export function useActivities(poolId: string) {
+export function useActivities(poolId?: string): ActivitiesHookResponse {
   const [error, setError] = useState<ResponseError>();
   const staffEndpoints = useStaffSharedEndpoints();
-  const [activities, setActivities] = useState<any[]>([]);
-  const employees = staffEndpoints.getAllEmployees;
+  const [activities, setActivities] = useState<ActivityModel[]>([]);
+  const employeesQuery = staffEndpoints.getAllEmployees;
   const activitiesQuery = useGetActivitiesByPoolIdQuery(poolId ?? skipToken);
   const [deleteActivity, deleteState] = useDeleteActivityMutation();
 
-  const fetchError = (activitiesQuery.error || employees.error) as ResponseError;
+  const fetchError = (activitiesQuery.error || employeesQuery.error) as ResponseError;
 
   useEffect(() => {
-    if (!activitiesQuery.data || !employees.data) return;
+    if (!activitiesQuery.data || !employeesQuery.data) return;
 
-    const employeeMap = new Map(employees.data.items.map(e => [e.id, e.fullName]));
+    const employeeMap = new Map(employeesQuery.data.items.map(e => [e.id, e.fullName]));
 
     const merged = activitiesQuery.data.items.map(activity => ({
       ...activity,
@@ -29,9 +31,9 @@ export function useActivities(poolId: string) {
     }));
 
     setActivities(merged);
-  }, [activitiesQuery.data, employees.data]);
+  }, [activitiesQuery.data, employeesQuery.data]);
 
-  const DeleteActivityAction = async (id: string) => {
+  const deleteAction = async (id: string) => {
     try {
       await deleteActivity(id).unwrap();
     } catch (error) {
@@ -43,7 +45,7 @@ export function useActivities(poolId: string) {
 
   const refetchAction = async () => {
     setError(undefined);
-    await Promise.all([employees.refetch(), activitiesQuery.refetch()]);
+    await Promise.all([employeesQuery.refetch(), activitiesQuery.refetch()]);
   };
 
   // Show API Errors once
@@ -59,15 +61,16 @@ export function useActivities(poolId: string) {
       activities: activities,
     },
     state: {
-      activitiesState: activitiesQuery,
+      activityState: activitiesQuery,
+      employeeState: employeesQuery,
       deleteState: deleteState,
-      employeesState: employees,
     },
     errors: {
-      error,
+      error: error,
+      fetchError: fetchError as ResponseError,
     },
     actions: {
-      deleteActivity: (id: string) => DeleteActivityAction(id),
+      delete: (id: string) => deleteAction(id),
       refetch: refetchAction,
     },
   };

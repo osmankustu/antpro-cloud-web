@@ -1,20 +1,24 @@
 import { ResponseError } from '@/core/connection/types/error/errorResponse';
+import { useAppSelector } from '@/core/store/base/hook';
 import { Toast } from '@/core/utils/toast/toast';
 import { useAddActivityMutation } from '@/modules/service-management/endpoints/activity.endpoints';
 import { useAddDocumentMutation } from '@/modules/service-management/endpoints/document.endpoints';
 import { ActivityAddModel } from '@/modules/service-management/types/activity.types';
 import { useState } from 'react';
+import { ActivityAddHookResponse } from './types/activityHookReturn.types';
 
-export function useAddActivity(serviceId?: string) {
-  const [formError, setFormError] = useState<ResponseError>();
+export function useAddActivity(serviceId?: string): ActivityAddHookResponse {
+  const [error, setError] = useState<ResponseError>();
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ActivityAddModel, string>>>(
     {},
   );
-  const [addActivity, submitState] = useAddActivityMutation();
+  const [addActivity, activitySubmitState] = useAddActivityMutation();
   const [addDocument, documentSubmitState] = useAddDocumentMutation();
+  const currentUser = useAppSelector(s => s.auth.user);
+  const progress = useAppSelector(s => s.ui.uploadProgress);
 
   const addActivityAction = async (activityData: ActivityAddModel, fileData: File[]) => {
-    setFormError(undefined);
+    setError(undefined);
     setFieldErrors({});
 
     try {
@@ -32,7 +36,7 @@ export function useAddActivity(serviceId?: string) {
       }
     } catch (error) {
       const e = error as ResponseError;
-      setFormError(e);
+      setError(e);
 
       if (e.Errors && Array.isArray(e.Errors)) {
         const mappedErrors: Partial<Record<keyof ActivityAddModel, string>> = {};
@@ -52,17 +56,20 @@ export function useAddActivity(serviceId?: string) {
   };
 
   return {
-    data: {},
-    state: {
-      documentState: documentSubmitState,
-      activityState: submitState,
+    data: {
+      currentUser: currentUser,
     },
-    error: {
-      formError,
-      fieldErrors,
+    state: {
+      activitySubmitState: activitySubmitState,
+      documentSubmitState: documentSubmitState,
+      documentProgress: progress,
+    },
+    errors: {
+      error: error,
+      fieldErrors: fieldErrors,
     },
     actions: {
-      addActivity: addActivityAction,
+      add: (payload, files) => addActivityAction(payload, files),
     },
   };
 }

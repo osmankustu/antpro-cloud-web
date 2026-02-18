@@ -91,9 +91,9 @@ export function ServiceDetailToolbar({ model, router }: ServiceDetailToolbarProp
               onDeleting={state.deleteState.isLoading}
               onSuccess={state.deleteState.isSuccess}
             />
-            <ToolbarButton active={false} onClick={() => console.log('Yazdır')}>
-              Yazdır
-            </ToolbarButton>
+            {/* <ToolbarButton active={false} onClick={() => console.log('Yazdır')}>
+              Belge Oluştur
+            </ToolbarButton> */}
           </div>
         </div>
       </div>

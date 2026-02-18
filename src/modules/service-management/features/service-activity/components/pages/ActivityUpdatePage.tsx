@@ -1,30 +1,32 @@
 import TextArea from '@/components/form/input/TextArea';
 import { UpdateModalButton } from '@/components/ui/button/UpdateModalButton';
-import { useAppSelector } from '@/core/store/base/hook';
 import FormField from '@/modules/service-management/components/forms/FormField';
 import { ServiceStatusSelect } from '@/modules/service-management/components/forms/ServiceStatusSelect';
 import { FullRow, Section } from '@/modules/service-management/components/ui/detail';
 import { ServiceMessages } from '@/modules/service-management/constants/serviceMessages';
-import {
-  ActivityModel,
-  ActivityUpdateModel,
-} from '@/modules/service-management/types/activity.types';
-import { ServiceModel } from '@/modules/service-management/types/service.types';
+import { ActivityUpdateModel } from '@/modules/service-management/types/activity.types';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { ServiceDetailHookResponse } from '../../../service/hooks/types/serviceHookReturn.types';
+import { ActivitiyDetailHookResponse } from '../../hooks/types/activityHookReturn.types';
 import { useUpdateActivity } from '../../hooks/useUpdateActivity';
 import { ActivityDropzone } from '../forms/ActivityDropzone';
 
 interface ActivityUpdatePageProps {
-  activity?: ActivityModel;
-  service?: ServiceModel;
+  models: {
+    activityModel: ActivitiyDetailHookResponse;
+    serviceModel: ServiceDetailHookResponse;
+  };
+  router: AppRouterInstance;
 }
 
-export function ActivityUpdatePage({ activity, service }: ActivityUpdatePageProps) {
-  const { actions, state, error } = useUpdateActivity(service?.id);
-  const progress = useAppSelector(s => s.ui.uploadProgress);
+export function ActivityUpdatePage({ models, router }: ActivityUpdatePageProps) {
+  const activity = models.activityModel.data.activity;
+  const service = models.serviceModel.data.service;
 
-  const employee = useAppSelector(s => s.auth.user);
+  const { actions, state, errors, data } = useUpdateActivity(service?.id);
+
   const [files, setFiles] = useState<File[]>([]);
   const { control, reset, getValues, handleSubmit } = useForm<ActivityUpdateModel>({
     defaultValues: {},
@@ -35,16 +37,16 @@ export function ActivityUpdatePage({ activity, service }: ActivityUpdatePageProp
       reset({
         description: activity?.description ?? '',
         status: activity?.status ?? '',
-        employeeId: employee?.employeeId ?? '',
+        employeeId: data.currentUser?.employeeId ?? '',
         id: activity?.id ?? '',
         poolId: activity?.poolId ?? '',
         createdDate: activity?.createdDate ?? '',
       });
     }
-  }, [activity, employee]);
+  }, [activity, data.currentUser]);
 
   const handleActivitySubmit = async (data: ActivityUpdateModel) => {
-    actions.updateActivity(data, files);
+    actions.update(data, files);
   };
 
   return (
@@ -55,7 +57,13 @@ export function ActivityUpdatePage({ activity, service }: ActivityUpdatePageProp
             <Controller
               control={control}
               name="description"
-              render={({ field }) => <TextArea {...field} />}
+              render={({ field }) => (
+                <TextArea
+                  {...field}
+                  error={!!errors.fieldErrors.description}
+                  hint={errors.fieldErrors.description}
+                />
+              )}
             />
           </FormField>
 
@@ -67,6 +75,7 @@ export function ActivityUpdatePage({ activity, service }: ActivityUpdatePageProp
                 <ServiceStatusSelect
                   onChange={value => field.onChange(value)}
                   value={getValues('status')}
+                  error={!!errors.fieldErrors.status}
                 />
               )}
             />
@@ -75,14 +84,15 @@ export function ActivityUpdatePage({ activity, service }: ActivityUpdatePageProp
       </Section>
       <ActivityDropzone
         onChange={value => setFiles(value)}
-        isSubmitting={state.documentState.isLoading}
+        isSubmitting={state.documentSubmitState.isLoading}
+        progress={state.documentProgress}
       />
       <div className="flex justify-end">
         <UpdateModalButton
           message={ServiceMessages.updateActivity}
           onConfirm={handleSubmit(handleActivitySubmit)}
-          onSubmitting={state.documentState.isLoading || state.activityState.isLoading}
-          onSuccess={state.activityState.isSuccess && progress === 100}
+          onSubmitting={state.documentSubmitState.isLoading || state.activitySubmitState.isLoading}
+          onSuccess={state.activitySubmitState.isSuccess}
         />
       </div>
     </div>

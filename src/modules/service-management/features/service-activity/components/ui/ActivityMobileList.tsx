@@ -1,30 +1,25 @@
 import Button from '@/components/ui/button/Button';
 import ServiceStatus from '@/components/ui/indicators/ServiceStatus';
-import { ResponseError } from '@/core/connection/types/error/errorResponse';
 import { formatDate } from '@/core/utils/formatters/dateFormatter';
-import { ActivityModel } from '@/modules/service-management/types/activity.types';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import { ActivitiesHookResponse } from '../../hooks/types/activityHookReturn.types';
 
 interface ActivityMobileListProps {
-  activities?: ActivityModel[];
-  isLoading?: boolean;
-  isFetching?: boolean;
-  error?: ResponseError;
+  model: ActivitiesHookResponse;
   router: AppRouterInstance;
-  onRetry: () => void;
 }
 
-export function ActivityMobileList({
-  router,
-  activities,
-  error,
-  onRetry,
-  isFetching,
-  isLoading,
-}: ActivityMobileListProps) {
-  const showSpinner = isLoading || isFetching;
-  const showEmpty = !isLoading && !isFetching && !error && activities?.length === 0;
-  const showError = !isLoading && !isFetching && error;
+export function ActivityMobileList({ model, router }: ActivityMobileListProps) {
+  const { actions, data, errors, state } = model;
+
+  const showSpinner = state.activityState.isLoading || state.activityState.isFetching;
+  const showEmpty =
+    !state.activityState.isLoading &&
+    !state.activityState.isFetching &&
+    !errors.error &&
+    data.activities?.length === 0;
+  const showError =
+    !state.activityState.isLoading && !state.activityState.isFetching && errors.error;
 
   return (
     <div className="grid gap-3 md:hidden">
@@ -37,7 +32,9 @@ export function ActivityMobileList({
       {showError ? (
         <div className="rounded-xl border border-gray-200 p-4 text-center dark:border-gray-800">
           <div>
-            <p className="text-sm font-medium text-gray-800 dark:text-white/90">{error?.detail}</p>
+            <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+              {errors.error?.detail}
+            </p>
           </div>
         </div>
       ) : showEmpty ? (
@@ -49,7 +46,7 @@ export function ActivityMobileList({
           </div>
         </div>
       ) : (
-        activities?.map((activity, index) => (
+        data.activities?.map((activity, index) => (
           <div
             key={activity.id}
             className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03]"

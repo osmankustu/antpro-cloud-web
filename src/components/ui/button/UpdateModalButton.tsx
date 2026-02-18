@@ -22,8 +22,11 @@ export function UpdateModalButton({
 }: DeleteModalProps) {
   const { openModal, isOpen, closeModal } = useModal();
 
+  console.log('onSubmit', onSubmitting);
+  console.log('onError', onError);
+  console.log('onSuccess', onSuccess);
   useEffect(() => {
-    closeModal();
+    if (onSuccess) closeModal();
   }, [onSuccess]);
 
   return (

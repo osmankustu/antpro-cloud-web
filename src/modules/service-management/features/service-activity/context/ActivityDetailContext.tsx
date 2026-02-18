@@ -1,18 +1,9 @@
-import { ResponseError } from '@/core/connection/types/error/errorResponse';
-import { ActivityModel } from '@/modules/service-management/types/activity.types';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { createContext, useContext } from 'react';
+import { ActivitiyDetailHookResponse } from '../hooks/types/activityHookReturn.types';
 
 export type ActivityDetailContextType = {
-  activity?: ActivityModel;
-  employeeFullName: string | null;
-  isLoading: boolean;
-  isFetching: boolean;
-  isDeleting: boolean;
-  isDeleteSuccess: boolean;
-  error: ResponseError | undefined;
-  refetch: () => void;
-  handleDelete: () => Promise<void>;
+  activityDetailResponse: ActivitiyDetailHookResponse;
   router: AppRouterInstance;
 };
 

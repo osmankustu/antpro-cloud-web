@@ -1,20 +1,24 @@
 import { ResponseError } from '@/core/connection/types/error/errorResponse';
+import { useAppSelector } from '@/core/store/base/hook';
 import { Toast } from '@/core/utils/toast/toast';
 import { useUpdateActivityMutation } from '@/modules/service-management/endpoints/activity.endpoints';
 import { useAddDocumentMutation } from '@/modules/service-management/endpoints/document.endpoints';
 import { ActivityUpdateModel } from '@/modules/service-management/types/activity.types';
 import { useState } from 'react';
+import { ActivityUpdateHookResponse } from './types/activityHookReturn.types';
 
-export function useUpdateActivity(serviceId?: string) {
-  const [formError, setFormError] = useState<ResponseError>();
+export function useUpdateActivity(serviceId?: string): ActivityUpdateHookResponse {
+  const [error, setError] = useState<ResponseError>();
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<keyof ActivityUpdateModel, string>>
   >({});
-  const [UpdateActivity, submitState] = useUpdateActivityMutation();
+  const [UpdateActivity, activitySubmitState] = useUpdateActivityMutation();
   const [addDocument, documentSubmitState] = useAddDocumentMutation();
+  const currentUser = useAppSelector(s => s.auth.user);
+  const progress = useAppSelector(s => s.ui.uploadProgress);
 
   const updateActivityAction = async (activityData: ActivityUpdateModel, fileData: File[]) => {
-    setFormError(undefined);
+    setError(undefined);
     setFieldErrors({});
 
     try {
@@ -32,7 +36,7 @@ export function useUpdateActivity(serviceId?: string) {
       }
     } catch (error) {
       const e = error as ResponseError;
-      setFormError(e);
+      setError(e);
 
       if (e.Errors && Array.isArray(e.Errors)) {
         const mappedErrors: Partial<Record<keyof ActivityUpdateModel, string>> = {};
@@ -52,17 +56,20 @@ export function useUpdateActivity(serviceId?: string) {
   };
 
   return {
-    data: {},
-    state: {
-      documentState: documentSubmitState,
-      activityState: submitState,
+    data: {
+      currentUser: currentUser,
     },
-    error: {
-      formError,
-      fieldErrors,
+    state: {
+      activitySubmitState: activitySubmitState,
+      documentSubmitState: documentSubmitState,
+      documentProgress: progress,
+    },
+    errors: {
+      error: error,
+      fieldErrors: fieldErrors,
     },
     actions: {
-      updateActivity: updateActivityAction,
+      update: (payload, files) => updateActivityAction(payload, files),
     },
   };
 }

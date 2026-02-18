@@ -11,21 +11,16 @@ export default function ActivityDetailLayout({ children }: { children: React.Rea
   const id = params.activityId as string;
 
   function ToolbarBridge() {
-    const query = useActivityDetailCtx();
+    const activityCtx = useActivityDetailCtx();
     const serviceCtx = useServiceDetailCtx();
+
     return (
       <ActivityDetailToolbar
-        title="Hareket Detayları"
-        router={query.router}
-        activity={query.activity}
-        service={serviceCtx.serviceDetailResponse.data.service}
-        isLoading={query.isLoading}
-        isFetching={query.isFetching}
-        isDeleting={query.isDeleting}
-        isDeletingSuccess={query.isDeleteSuccess}
-        error={query.error}
-        onRetry={query.refetch}
-        onDelete={query.handleDelete}
+        models={{
+          activityModel: activityCtx.activityDetailResponse,
+          serviceModels: serviceCtx.serviceDetailResponse,
+        }}
+        router={activityCtx.router}
       />
     );
   }

@@ -5,12 +5,15 @@ import { useActivityDetailCtx } from '@/modules/service-management/features/serv
 import { useServiceDetailCtx } from '@/modules/service-management/features/service/context/ServiceDetailContext';
 
 export default function Page() {
-  const query = useActivityDetailCtx();
+  const activityCtx = useActivityDetailCtx();
   const serviceCtx = useServiceDetailCtx();
   return (
     <ActivityUpdatePage
-      activity={query.activity}
-      service={serviceCtx.serviceDetailResponse.data.service}
+      models={{
+        activityModel: activityCtx.activityDetailResponse,
+        serviceModel: serviceCtx.serviceDetailResponse,
+      }}
+      router={activityCtx.router}
     />
   );
 }

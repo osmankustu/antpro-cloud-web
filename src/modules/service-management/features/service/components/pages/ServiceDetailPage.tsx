@@ -19,6 +19,7 @@ interface ServiceDetailPageProps {
 
 export default function ServiceDetailPage({ model, router }: ServiceDetailPageProps) {
   const { data, actions, state, errors } = model;
+
   if (state.serviceState.isLoading || state.serviceState.isFetching) {
     return <Skeleton />;
   }

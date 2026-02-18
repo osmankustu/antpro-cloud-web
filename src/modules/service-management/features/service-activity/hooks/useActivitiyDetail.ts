@@ -7,13 +7,14 @@ import {
 import { useStaffSharedEndpoints } from '@/modules/staff-management/hooks/useStaffSharedEndpoints';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { useEffect, useMemo, useState } from 'react';
+import { ActivitiyDetailHookResponse } from './types/activityHookReturn.types';
 
-export function useActivityDetail(activityId: string) {
+export function useActivityDetail(activityId: string): ActivitiyDetailHookResponse {
   const [error, setError] = useState<ResponseError | undefined>(undefined);
   const staffEndpoints = useStaffSharedEndpoints();
   const activityQuery = useGetActivityByIdQuery(activityId ?? skipToken);
   const employeesQuery = staffEndpoints.getAllEmployees;
-  const [deleteActivity, deleteSubmitStatus] = useDeleteActivityMutation();
+  const [deleteActivity, deleteState] = useDeleteActivityMutation();
 
   const fetchError = (activityQuery.error || employeesQuery.error) as ResponseError;
 
@@ -46,7 +47,6 @@ export function useActivityDetail(activityId: string) {
 
   const refetchAction = async () => {
     setError(undefined);
-
     await Promise.all([activityQuery.refetch(), employeesQuery.refetch()]);
   };
 
@@ -54,13 +54,13 @@ export function useActivityDetail(activityId: string) {
     // Data
 
     data: {
-      activitiy: activityQuery.data,
-      employeeFullName: employeeFullName,
+      activity: activityQuery.data,
+      employeeName: employeeFullName,
     },
     state: {
       activityState: activityQuery,
-      employeesState: employeesQuery,
-      deleteSubmitStatus: deleteSubmitStatus,
+      employeeState: employeesQuery,
+      deleteState: deleteState,
     },
     errors: {
       error,

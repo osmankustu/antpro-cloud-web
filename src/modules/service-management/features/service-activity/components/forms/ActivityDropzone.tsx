@@ -1,5 +1,4 @@
 import ComponentCard from '@/components/common/ComponentCard';
-import { useAppSelector } from '@/core/store/base/hook';
 import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -8,10 +7,10 @@ import { FaFilePdf, FaTrash } from 'react-icons/fa';
 interface ActivityDropzoneProps {
   onChange: (files: File[]) => void;
   isSubmitting: boolean;
+  progress: number | null;
 }
 
-export function ActivityDropzone({ onChange, isSubmitting }: ActivityDropzoneProps) {
-  const progress = useAppSelector(s => s.ui.uploadProgress);
+export function ActivityDropzone({ onChange, isSubmitting, progress }: ActivityDropzoneProps) {
   const [files, setFiles] = useState<File[]>([]);
 
   useEffect(() => {

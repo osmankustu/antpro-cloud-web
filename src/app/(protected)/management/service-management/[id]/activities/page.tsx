@@ -3,6 +3,6 @@ import ActivityListPage from '@/modules/service-management/features/service-acti
 import { useServiceDetailCtx } from '@/modules/service-management/features/service/context/ServiceDetailContext';
 
 export default function Page() {
-  const query = useServiceDetailCtx();
-  return <ActivityListPage service={query.serviceDetailResponse?.data.service} />;
+  const ctx = useServiceDetailCtx();
+  return <ActivityListPage model={ctx.serviceDetailResponse} router={ctx.router} />;
 }

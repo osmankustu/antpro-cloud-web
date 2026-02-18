@@ -1,31 +1,25 @@
 import ServiceStatus from '@/components/ui/indicators/ServiceStatus';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
 import { RowActions } from '@/components/ui/table/RowActions';
-import { ResponseError } from '@/core/connection/types/error/errorResponse';
 import { formatDate } from '@/core/utils/formatters/dateFormatter';
-import { ActivityModel } from '@/modules/service-management/types/activity.types';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import { ActivitiesHookResponse } from '../../hooks/types/activityHookReturn.types';
 
 interface ActivityTableProps {
-  activities?: ActivityModel[];
-  isLoading?: boolean;
-  isFetching?: boolean;
-  error?: ResponseError;
+  model: ActivitiesHookResponse;
   router: AppRouterInstance;
-  onRetry: () => void;
 }
 
-export function ActivityTable({
-  activities,
-  isLoading,
-  isFetching,
-  error,
-  router,
-  onRetry,
-}: ActivityTableProps) {
-  const showSpinner = isLoading || isFetching;
-  const showEmpty = !isLoading && !isFetching && !error && activities?.length === 0;
-  const showError = !isLoading && !isFetching && error;
+export function ActivityTable({ model, router }: ActivityTableProps) {
+  const { data, actions, errors, state } = model;
+  const showSpinner = state.activityState.isLoading || state.activityState.isFetching;
+  const showEmpty =
+    !state.activityState.isLoading &&
+    !state.activityState.isFetching &&
+    !errors.error &&
+    data.activities?.length === 0;
+  const showError =
+    !state.activityState.isLoading && !state.activityState.isFetching && errors.error;
 
   return (
     <div className="relative hidden max-w-full overflow-x-auto md:block">
@@ -64,8 +58,8 @@ export function ActivityTable({
             <TableRow>
               <TableCell colSpan={10}>
                 <div className="text-center text-sm text-red-500 dark:text-red-400">
-                  {error.detail || 'Servis bilgileri yüklenemedi.'}
-                  <button className="ml-2 underline" onClick={onRetry}>
+                  {errors.error?.detail || 'Servis bilgileri yüklenemedi.'}
+                  <button className="ml-2 underline" onClick={actions.refetch}>
                     Tekrar Dene
                   </button>
                 </div>
@@ -86,7 +80,7 @@ export function ActivityTable({
           </TableBody>
         ) : (
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {activities?.map((activity, index) => (
+            {data.activities?.map((activity, index) => (
               <TableRow key={activity.id} className="transition-all duration-300">
                 <TableCell className="sm:text-theme-sm py-2 text-xs sm:py-3">
                   <p className="font-medium text-gray-800 dark:text-white/90">{index + 1}</p>
@@ -116,6 +110,7 @@ export function ActivityTable({
                   <RowActions
                     onDetail={() => router.push(`activities/${activity.id}`)}
                     onEdit={() => router.push(`activities/${activity.id}/edit-activity`)}
+                    onDelete={() => actions.delete(activity.id)}
                   />
                 </TableCell>
               </TableRow>
