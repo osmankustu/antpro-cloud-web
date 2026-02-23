@@ -97,7 +97,7 @@ export function DocumentCardList({ model, router, isActivity }: DocumentCardList
                 <div className="mt-4 flex justify-end">
                   <RowActions
                     onDelete={() => model.actions.delete(document.id)}
-                    onDownload={() => model.actions.download(document.filePath)}
+                    onDownload={() => model.actions.download(document)}
                     onView={() => window.open(document?.filePath, '_blank', 'noopener,noreferrer')}
                   />
                 </div>
