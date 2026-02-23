@@ -22,7 +22,7 @@ export function ActivityTable({ model, router }: ActivityTableProps) {
     !state.activityState.isLoading && !state.activityState.isFetching && errors.error;
 
   return (
-    <div className="relative hidden max-w-full overflow-x-auto md:block">
+    <div className="relative hidden max-w-full overflow-x-auto rounded-2xl border border-gray-200 bg-white p-5 md:block dark:border-gray-800 dark:bg-white/[0.03]">
       {/* Local spinner */}
       {showSpinner && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 dark:bg-black/40">

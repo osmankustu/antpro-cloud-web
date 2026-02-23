@@ -7,8 +7,9 @@ import {
 } from '@/modules/service-management/endpoints/document.endpoints';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { useEffect, useMemo, useState } from 'react';
+import { DocumentByServiceIdHookResponse } from './types/documentHookReturn.types';
 
-export function useDocumentsByService(serviceId?: string) {
+export function useDocumentsByService(serviceId?: string): DocumentByServiceIdHookResponse {
   const [error, setError] = useState<ResponseError | undefined>(undefined);
   const documentQuery = useGetDocumentByServiceIdQuery(serviceId ? serviceId : skipToken);
   const urls = documentQuery.data?.items?.map(d => d.filePath) ?? [];
@@ -43,6 +44,8 @@ export function useDocumentsByService(serviceId?: string) {
     }
   };
 
+  const downloadAction = async (path?: string) => {};
+
   const refetchAction = async () => {
     setError(undefined);
     await Promise.all([documentQuery.refetch(), signedQuery.refetch()]);
@@ -55,7 +58,7 @@ export function useDocumentsByService(serviceId?: string) {
     state: {
       documentState: documentQuery,
       signedState: signedQuery,
-      deleteSubmitState: deleteSubmitState,
+      deleteState: deleteSubmitState,
     },
     errors: {
       error,
@@ -63,7 +66,8 @@ export function useDocumentsByService(serviceId?: string) {
     },
     actions: {
       refetch: refetchAction,
-      delete: deleteAction,
+      delete: (id: string) => deleteAction(id),
+      download: path => downloadAction(path),
     },
   };
 }

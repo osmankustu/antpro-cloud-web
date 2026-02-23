@@ -1,41 +1,45 @@
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
 import { RowActions } from '@/components/ui/table/RowActions';
-import { ResponseError } from '@/core/connection/types/error/errorResponse';
 import { formatDate } from '@/core/utils/formatters/dateFormatter';
 import { DocumentModel } from '@/modules/service-management/types/document.types';
 import Image from 'next/image';
+import {
+  DocumentByActivityHookResponse,
+  DocumentByServiceIdHookResponse,
+} from '../../hooks/types/documentHookReturn.types';
+import { DocumentToolbar } from './DocumentToolbar';
 
 interface DocumentTableProps {
-  documents?: DocumentModel[];
-  isLoading?: boolean;
-  isFetching?: boolean;
-  error?: ResponseError;
-  onRetry: () => void;
-  onView: (doc: DocumentModel) => void;
-  onDownload: (doc: DocumentModel) => void;
-  onDelete: (doc: DocumentModel) => Promise<void>;
-  onDeleting?: boolean;
-  onSuccess?: boolean;
+  model: DocumentByServiceIdHookResponse | DocumentByActivityHookResponse;
+  isSelected: boolean;
+  onView: (document: DocumentModel) => void;
+  onHide: () => void;
+  isActivity?: boolean;
 }
 
 export function DocumentTable({
-  documents,
-  isLoading,
-  isFetching,
-  error,
-  onRetry,
+  model,
+  isSelected,
   onView,
-  onDownload,
-  onDelete,
-  onDeleting,
-  onSuccess,
+  onHide,
+  isActivity = false,
 }: DocumentTableProps) {
-  const showSpinner = isLoading || isFetching;
-  const showEmpty = !isLoading && !isFetching && !error && documents?.length === 0;
-  const showError = !isLoading && !isFetching && error;
+  const showSpinner = model.state.signedState.isLoading || model.state.signedState.isFetching;
+  const showEmpty =
+    !model.state.signedState.isLoading &&
+    !model.state.signedState.isFetching &&
+    !model.errors.error &&
+    model.data.documents?.length === 0;
+  const showError =
+    !model.state.signedState.isLoading && !model.state.signedState.isFetching && model.errors.error;
 
   return (
-    <div className="relative hidden max-w-full overflow-x-auto md:block">
+    <div className="relative hidden max-w-full overflow-x-auto rounded-2xl border border-gray-200 bg-white p-5 md:block dark:border-gray-800 dark:bg-white/[0.03]">
+      <DocumentToolbar
+        title={isActivity ? 'Eklenen Dökümanlar' : 'Tüm Dökümanlar'}
+        onHide={onHide}
+        isSelected={isSelected}
+      />
       {/* Spinner */}
       {showSpinner && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 dark:bg-black/40">
@@ -46,15 +50,25 @@ export function DocumentTable({
       <Table className="min-w-[900px]">
         <TableHeader className="border-y border-gray-100 dark:border-gray-800">
           <TableRow>
-            {['Dosya', 'Tip', 'Boyut', 'Ön İzleme', 'Tarih', 'İşlemler'].map(title => (
-              <TableCell
-                key={title}
-                isHeader
-                className="py-2 text-start text-xs font-medium text-gray-500 sm:py-3 dark:text-gray-400"
-              >
-                {title}
-              </TableCell>
-            ))}
+            {isSelected
+              ? ['Dosya', 'Tip', 'İşlemler'].map(title => (
+                  <TableCell
+                    key={title}
+                    isHeader
+                    className="py-2 text-start text-xs font-medium text-gray-500 sm:py-3 dark:text-gray-400"
+                  >
+                    {title}
+                  </TableCell>
+                ))
+              : ['Dosya', 'Tip', 'Boyut', 'Ön İzleme', 'Tarih', 'İşlemler'].map(title => (
+                  <TableCell
+                    key={title}
+                    isHeader
+                    className="py-2 text-start text-xs font-medium text-gray-500 sm:py-3 dark:text-gray-400"
+                  >
+                    {title}
+                  </TableCell>
+                ))}
           </TableRow>
         </TableHeader>
 
@@ -63,8 +77,8 @@ export function DocumentTable({
             <TableRow>
               <TableCell colSpan={10}>
                 <div className="text-center text-sm text-red-500 dark:text-red-400">
-                  {error.detail || 'Dökümanlar yüklenemedi.'}
-                  <button className="ml-2 underline" onClick={onRetry}>
+                  {model.errors.error?.detail || 'Dökümanlar yüklenemedi.'}
+                  <button className="ml-2 underline" onClick={model.actions.refetch}>
                     Tekrar Dene
                   </button>
                 </div>
@@ -83,53 +97,57 @@ export function DocumentTable({
           </TableBody>
         ) : (
           <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {documents?.map(doc => (
-              <TableRow key={doc.id}>
+            {model.data.documents?.map(document => (
+              <TableRow key={document.id}>
                 {/* Dosya adı */}
                 <TableCell className="sm:text-theme-sm py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
-                  {doc.fileName}
+                  {document.fileName}
                 </TableCell>
 
                 {/* Tip */}
                 <TableCell className="sm:text-theme-sm py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
-                  {doc.fileType}
+                  {document.fileType}
                 </TableCell>
 
                 {/* Boyut */}
-                <TableCell className="sm:text-theme-sm py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
-                  {formatFileSize(doc.fileSize)}
-                </TableCell>
 
                 {/* Ön izleme */}
-                <TableCell>
-                  {doc.filePath && isImage(doc.fileType) ? (
-                    <Image
-                      src={doc.filePath}
-                      width={100}
-                      height={100}
-                      alt={doc.fileName}
-                      className="h-10 w-10 rounded-md object-cover"
-                    />
-                  ) : (
-                    <div className="sm:text-theme-sm py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
-                      {doc.fileType.split('/')[1]?.toUpperCase() || 'FILE'}
-                    </div>
-                  )}
-                </TableCell>
-
-                {/* Tarih */}
-                <TableCell className="sm:text-theme-sm py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
-                  {formatDate(doc.createdDate)}
-                </TableCell>
+                {!isSelected && (
+                  <>
+                    <TableCell className="sm:text-theme-sm py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
+                      {formatFileSize(document.fileSize)}
+                    </TableCell>
+                    <TableCell>
+                      {document.filePath && isImage(document.fileType) ? (
+                        <Image
+                          src={document.filePath}
+                          width={100}
+                          height={100}
+                          alt={document.fileName}
+                          className="h-10 w-10 rounded-md object-cover"
+                        />
+                      ) : (
+                        <div className="sm:text-theme-sm py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
+                          {document.fileType.split('/')[1]?.toUpperCase() || 'FILE'}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="sm:text-theme-sm py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
+                      {formatDate(document.createdDate)}
+                    </TableCell>
+                  </>
+                )}
 
                 {/* İşlemler */}
                 <TableCell className="sm:text-theme-sm z-10 py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
                   <RowActions
-                    onView={() => onView(doc)}
-                    onDelete={() => onDelete(doc)}
-                    onDownload={() => onDownload(doc)}
-                    onDeleting={onDeleting}
-                    onSuccess={onSuccess}
+                    onView={() => {
+                      onView(document);
+                    }}
+                    onDelete={() => model.actions.delete(document.id)}
+                    onDownload={() => model.actions.download(document.filePath)}
+                    onDeleting={model.state.deleteState.isLoading}
+                    onSuccess={model.state.deleteState.isSuccess}
                   />
                 </TableCell>
               </TableRow>

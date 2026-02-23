@@ -7,8 +7,9 @@ import {
 } from '@/modules/service-management/endpoints/document.endpoints';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { useEffect, useMemo, useState } from 'react';
+import { DocumentByActivityHookResponse } from './types/documentHookReturn.types';
 
-export function useDocumentsByActivity(activityId?: string) {
+export function useDocumentsByActivity(activityId?: string): DocumentByActivityHookResponse {
   const [error, setError] = useState<ResponseError | undefined>(undefined);
   const doucmentsQuery = useGetDocumentByActivityIdQuery(activityId ? activityId : skipToken);
   const [deleteDocument, deleteSubmitState] = useDeleteDocumentMutation();
@@ -43,6 +44,9 @@ export function useDocumentsByActivity(activityId?: string) {
       Toast.error(err.title || 'Döküman Silindi');
     }
   };
+
+  const downloadAction = async (path?: string) => {};
+
   const refetchAction = async () => {
     setError(undefined);
     await Promise.all([doucmentsQuery.refetch(), SignedQuery.refetch()]);
@@ -54,7 +58,7 @@ export function useDocumentsByActivity(activityId?: string) {
     state: {
       documentState: doucmentsQuery,
       signedState: SignedQuery,
-      deleteSubmitState: deleteSubmitState,
+      deleteState: deleteSubmitState,
     },
     errors: {
       error,
@@ -63,6 +67,7 @@ export function useDocumentsByActivity(activityId?: string) {
     actions: {
       refetch: refetchAction,
       delete: (id: string) => deleteAction(id),
+      download: path => downloadAction(path),
     },
   };
 }

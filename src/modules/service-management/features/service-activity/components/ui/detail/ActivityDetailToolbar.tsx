@@ -22,7 +22,7 @@ export function ActivityDetailToolbar({ models, router }: ActivityDetailToolbarP
   const isEdit = pathname.includes('/edit-activity');
 
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-5   sm:flex-row sm:items-center sm:justify-between dark:border-gray-800 dark:bg-white/[0.03]">
       <h4 className="text-xl font-semibold text-gray-800 dark:text-white/90">
         {'Hareket Detayları'}
       </h4>

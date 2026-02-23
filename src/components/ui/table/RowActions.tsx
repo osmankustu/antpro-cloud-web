@@ -1,5 +1,6 @@
 'use client';
 
+import { DocumentModel } from '@/modules/service-management/types/document.types';
 import { useEffect, useRef, useState } from 'react';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { DeleteModal } from '../button/DeleteModalButton';
@@ -12,6 +13,7 @@ interface RowActionsProps {
   onDownload?: () => void;
   onDeleting?: boolean;
   onSuccess?: boolean;
+  documentModel?: DocumentModel;
 }
 
 export function RowActions({
@@ -22,9 +24,11 @@ export function RowActions({
   onDownload,
   onDeleting,
   onSuccess,
+  documentModel,
 }: RowActionsProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<{ x: number; y: number } | undefined>(undefined);
 
   // dışarı tıklayınca kapat
   useEffect(() => {
@@ -42,7 +46,14 @@ export function RowActions({
     <div ref={ref} className="relative inline-block text-left">
       {/* 3 Nokta Butonu */}
       <button
-        onClick={() => setOpen(prev => !prev)}
+        onClick={e => {
+          e.stopPropagation();
+          setPosition({
+            x: e.clientX,
+            y: e.clientY,
+          });
+          setOpen(prev => !prev);
+        }}
         className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
       >
         <BsThreeDotsVertical size={20} className="dark:text-gray-400" />
@@ -50,7 +61,13 @@ export function RowActions({
 
       {/* Dropdown */}
       {open && (
-        <div className="fixed right-5 z-50 mt-2 w-40 rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+        <div
+          className="fixed z-50 w-40 rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900"
+          style={{
+            top: position!.y + 8,
+            left: position!.x - 140, // sağdan taşmayı önler
+          }}
+        >
           {onDetail && (
             <button
               onClick={() => {

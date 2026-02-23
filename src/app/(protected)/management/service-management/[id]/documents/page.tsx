@@ -3,6 +3,7 @@ import { DocumentListPage } from '@/modules/service-management/features/service-
 import { useServiceDetailCtx } from '@/modules/service-management/features/service/context/ServiceDetailContext';
 
 export default function Page() {
-  const query = useServiceDetailCtx();
-  return <DocumentListPage serviceId={query.serviceDetailResponse?.data.service?.id} />;
+  const ctx = useServiceDetailCtx();
+
+  return <DocumentListPage model={ctx.serviceDetailResponse} router={ctx.router} />;
 }

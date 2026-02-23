@@ -9,7 +9,7 @@ import {
 } from '@/modules/service-management/components/ui/detail';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import Link from 'next/link';
-import { DocumentTable } from '../../../service-document/components/ui/DocumentTable';
+import { DocumentListPage } from '../../../service-document/components/pages/DocumentListPage';
 import { useDocumentsByActivity } from '../../../service-document/hooks/useDocumentsByActivity';
 import { ActivitiyDetailHookResponse } from '../../hooks/types/activityHookReturn.types';
 
@@ -70,18 +70,7 @@ export function ActivityDetailPage({ model, router }: ActivityDetailPageProps) {
         </Row>
       </Section>
       <div className="mt-5">
-        <Section title="Eklenen Dökümanlar">
-          <DocumentTable
-            documents={query.data.documents}
-            error={query.errors.error}
-            isFetching={query.state.documentState.isFetching || query.state.signedState.isFetching}
-            isLoading={query.state.documentState.isLoading || query.state.signedState.isLoading}
-            onDelete={doc => query.actions.delete(doc.id)}
-            onDownload={() => {}}
-            onRetry={() => query.actions.refetch()}
-            onView={() => {}}
-          />
-        </Section>
+        <DocumentListPage isActivity={true} activityModel={model} router={router} />
       </div>
     </div>
   );
