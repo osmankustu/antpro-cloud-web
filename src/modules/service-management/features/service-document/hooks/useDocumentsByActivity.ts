@@ -5,6 +5,7 @@ import {
   useGetDocumentByActivityIdQuery,
   useGetDocumentsSignedUrlQuery,
 } from '@/modules/service-management/endpoints/document.endpoints';
+import { DocumentModel } from '@/modules/service-management/types/document.types';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { useEffect, useMemo, useState } from 'react';
 import { DocumentByActivityHookResponse } from './types/documentHookReturn.types';
@@ -45,7 +46,14 @@ export function useDocumentsByActivity(activityId?: string): DocumentByActivityH
     }
   };
 
-  const downloadAction = async (path?: string) => {};
+  const downloadAction = async (documentModel: DocumentModel) => {
+    const link = document.createElement('a');
+    link.href = documentModel.filePath;
+    link.download = documentModel.fileName; // bazı browserlar ignore edebilir
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const refetchAction = async () => {
     setError(undefined);
@@ -67,7 +75,7 @@ export function useDocumentsByActivity(activityId?: string): DocumentByActivityH
     actions: {
       refetch: refetchAction,
       delete: (id: string) => deleteAction(id),
-      download: path => downloadAction(path),
+      download: doc => downloadAction(doc),
     },
   };
 }

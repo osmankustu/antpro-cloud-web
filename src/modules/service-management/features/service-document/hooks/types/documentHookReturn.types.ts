@@ -30,7 +30,7 @@ export interface DocumentByActivityHookResponse {
   };
   actions: {
     refetch: () => Promise<void>;
-    download: (path?: string) => Promise<void>;
+    download: (doc: DocumentModel) => Promise<void>;
     delete: (id: string) => Promise<void>;
   };
 }
@@ -64,7 +64,7 @@ export interface DocumentByServiceIdHookResponse {
   };
   actions: {
     refetch: () => Promise<void>;
-    download: (path?: string) => Promise<void>;
+    download: (doc: DocumentModel) => Promise<void>;
     delete: (id: string) => Promise<void>;
   };
 }

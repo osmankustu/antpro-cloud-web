@@ -1,3 +1,4 @@
+import { getFileIcon } from '@/components/ui/icons/getFileIcons';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
 import { RowActions } from '@/components/ui/table/RowActions';
 import { formatDate } from '@/core/utils/formatters/dateFormatter';
@@ -106,7 +107,8 @@ export function DocumentTable({
 
                 {/* Tip */}
                 <TableCell className="sm:text-theme-sm py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
-                  {document.fileType}
+                  {getFileIcon(document.fileType, { size: 25 })}
+                  {document.fileType.split('/')[1]?.toUpperCase()}
                 </TableCell>
 
                 {/* Boyut */}
@@ -128,7 +130,7 @@ export function DocumentTable({
                         />
                       ) : (
                         <div className="sm:text-theme-sm py-2 text-xs text-gray-500 sm:py-3 dark:text-gray-400">
-                          {document.fileType.split('/')[1]?.toUpperCase() || 'FILE'}
+                          -
                         </div>
                       )}
                     </TableCell>
@@ -145,7 +147,7 @@ export function DocumentTable({
                       onView(document);
                     }}
                     onDelete={() => model.actions.delete(document.id)}
-                    onDownload={() => model.actions.download(document.filePath)}
+                    onDownload={() => model.actions.download(document)}
                     onDeleting={model.state.deleteState.isLoading}
                     onSuccess={model.state.deleteState.isSuccess}
                   />

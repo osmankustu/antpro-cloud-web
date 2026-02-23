@@ -2,7 +2,7 @@ import ToolbarButton from '@/components/ui/button/ToolbarButton';
 import { FaChevronLeft } from 'react-icons/fa';
 
 interface DocumentsToolbarProps {
-  onHide: () => void;
+  onHide?: () => void;
   isSelected?: boolean;
   title: string;
 }
@@ -17,7 +17,7 @@ export function DocumentToolbar({ onHide, isSelected, title }: DocumentsToolbarP
 
       <div className="w-full sm:w-auto">
         {isSelected && (
-          <ToolbarButton children={<FaChevronLeft size={15} />} onClick={() => onHide()} />
+          <ToolbarButton children={<FaChevronLeft size={15} />} onClick={() => onHide?.()} />
         )}
       </div>
     </div>
